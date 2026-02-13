@@ -1,10 +1,11 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
 import 'package:farmconnect/features/consumer/data/product_provider.dart';
+import 'package:farmconnect/shared/design_constants.dart';
 
 class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
@@ -23,7 +24,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   int? _selectedCategoryId;
   bool _isLoading = false;
   
-  File? _imageFile;
+  Uint8List? _imageBytes;
   final _picker = ImagePicker();
 
   final List<String> _units = ['kg', 'g', 'L', 'pc', 'dozen'];
@@ -39,9 +40,15 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 75,
+      );
       if (pickedFile != null) {
-        setState(() => _imageFile = File(pickedFile.path));
+        final bytes = await pickedFile.readAsBytes();
+        setState(() => _imageBytes = bytes);
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
@@ -81,11 +88,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       };
       
       // Upload Image if selected
-      if (_imageFile != null) {
+      if (_imageBytes != null) {
         final fileName = '${user.id}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        await supabase.storage.from('product-images').upload(
+        await supabase.storage.from('product-images').uploadBinary(
           fileName,
-          _imageFile!,
+          _imageBytes!,
         );
         final imageUrl = supabase.storage.from('product-images').getPublicUrl(fileName);
         productData['image_url'] = imageUrl;
@@ -136,17 +143,17 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.shade300, width: 2, style: BorderStyle.solid),
-                    image: _imageFile != null 
-                        ? DecorationImage(image: FileImage(_imageFile!), fit: BoxFit.cover)
+                    image: _imageBytes != null 
+                        ? DecorationImage(image: MemoryImage(_imageBytes!), fit: BoxFit.cover)
                         : null,
                   ),
-                  child: _imageFile == null 
+                  child: _imageBytes == null 
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add_a_photo, size: 40, color: Colors.grey.shade400),
+                            Icon(Icons.add_a_photo, size: 40, color: Colors.grey.shade600),
                             const SizedBox(height: 8),
-                            Text("Tap to add product image", style: GoogleFonts.outfit(color: Colors.grey)),
+                            Text("Tap to add product image", style: GoogleFonts.outfit(color: const Color(0xFF444444), fontWeight: FontWeight.bold)),
                           ],
                         )
                       : null,
@@ -156,14 +163,48 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Product Name", prefixIcon: Icon(Icons.shopping_bag_outlined)),
+                decoration: InputDecoration(
+                  labelText: "Product Name",
+                  prefixIcon: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF111111)),
+                  labelStyle: GoogleFonts.outfit(color: const Color(0xFF111111), fontWeight: FontWeight.w600),
+                  floatingLabelStyle: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(DesignRadius.m),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(DesignRadius.m),
+                    borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF9FAFB),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                ),
                 validator: (value) => value == null || value.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: 16),
               
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: "Description", prefixIcon: Icon(Icons.description_outlined)),
+                decoration: InputDecoration(
+                  labelText: "Description",
+                  prefixIcon: const Icon(Icons.description_outlined, color: Color(0xFF111111)),
+                  labelStyle: GoogleFonts.outfit(color: const Color(0xFF111111), fontWeight: FontWeight.w600),
+                  floatingLabelStyle: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(DesignRadius.m),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(DesignRadius.m),
+                    borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF9FAFB),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                ),
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
@@ -173,7 +214,24 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _priceController,
-                      decoration: const InputDecoration(labelText: "Price", prefixIcon: Icon(Icons.attach_money)),
+                      decoration: InputDecoration(
+                        labelText: "Price",
+                        prefixIcon: const Icon(Icons.attach_money, color: Color(0xFF111111)),
+                        labelStyle: GoogleFonts.outfit(color: const Color(0xFF111111), fontWeight: FontWeight.w600),
+                        floatingLabelStyle: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(DesignRadius.m),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(DesignRadius.m),
+                          borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF9FAFB),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) => value == null || value.isEmpty ? "Required" : null,
                     ),
@@ -182,7 +240,23 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedUnit,
-                      decoration: const InputDecoration(labelText: "Unit"),
+                      decoration: InputDecoration(
+                        labelText: "Unit",
+                        labelStyle: GoogleFonts.outfit(color: const Color(0xFF111111), fontWeight: FontWeight.w600),
+                        floatingLabelStyle: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(DesignRadius.m),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(DesignRadius.m),
+                          borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF9FAFB),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
                       items: _units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
                       onChanged: (val) => setState(() => _selectedUnit = val),
                     ),
@@ -193,7 +267,24 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               
               TextFormField(
                 controller: _stockController,
-                decoration: const InputDecoration(labelText: "Stock Quantity", prefixIcon: Icon(Icons.inventory)),
+                decoration: InputDecoration(
+                  labelText: "Stock Quantity",
+                  prefixIcon: const Icon(Icons.inventory, color: Color(0xFF111111)),
+                  labelStyle: GoogleFonts.outfit(color: const Color(0xFF111111), fontWeight: FontWeight.w600),
+                  floatingLabelStyle: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(DesignRadius.m),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(DesignRadius.m),
+                    borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF9FAFB),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                ),
                 keyboardType: TextInputType.number,
                 validator: (value) => value == null || value.isEmpty ? "Required" : null,
               ),
@@ -202,7 +293,24 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               categoriesAsync.when(
                 data: (categories) => DropdownButtonFormField<int>(
                   value: _selectedCategoryId,
-                  decoration: const InputDecoration(labelText: "Category", prefixIcon: Icon(Icons.category_outlined)),
+                  decoration: InputDecoration(
+                    labelText: "Category",
+                    prefixIcon: const Icon(Icons.category_outlined, color: Color(0xFF111111)),
+                    labelStyle: GoogleFonts.outfit(color: const Color(0xFF111111), fontWeight: FontWeight.w600),
+                    floatingLabelStyle: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(DesignRadius.m),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(DesignRadius.m),
+                      borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF9FAFB),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
                   items: categories.map((cat) => DropdownMenuItem<int>(
                     value: cat['id'] as int,
                     child: Text(cat['name'] as String),

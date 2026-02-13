@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import 'package:farmconnect/shared/design_constants.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
 
 final ordersProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
@@ -12,22 +12,25 @@ final ordersProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((r
   final response = await supabase
       .from('orders')
       .select()
-      .eq('consumer_id', user.id)
+      .eq('user_id', user.id)
       .order('created_at', ascending: false);
-  
+
   return List<Map<String, dynamic>>.from(response);
 });
 
-class ConsumerOrdersScreen extends ConsumerWidget {
-  const ConsumerOrdersScreen({super.key});
+class OrdersScreen extends ConsumerWidget {
+  const OrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(ordersProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("My Orders", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text('My Orders', style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontWeight: FontWeight.bold)),
       ),
       body: ordersAsync.when(
         data: (orders) {
@@ -36,92 +39,87 @@ class ConsumerOrdersScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.receipt_long, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text("No orders yet", style: GoogleFonts.outfit(fontSize: 18, color: Colors.grey)),
+                  Icon(Icons.receipt_long_outlined, size: 80, color: DesignColors.textSecondary.withOpacity(0.2)),
+                  const SizedBox(height: DesignSpacing.m),
+                  Text('No orders yet', style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 18)),
                 ],
               ),
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
+          return ListView.builder(
+            padding: const EdgeInsets.all(DesignSpacing.l),
             itemCount: orders.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               final order = orders[index];
-              final date = DateTime.parse(order['created_at']);
-              final formattedDate = DateFormat('MMM dd, yyyy • hh:mm a').format(date.toLocal());
-              final status = order['status'] ?? 'pending';
-              
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, offset: const Offset(0, 5))],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Order #${order['id']}",
-                          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(status).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            status.toUpperCase(),
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: _getStatusColor(status),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(formattedDate, style: GoogleFonts.outfit(color: Colors.grey, fontSize: 14)),
-                    const SizedBox(height: 12),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Total Amount", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                        Text(
-                          "\$${order['total_amount']}",
-                          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
+              return _buildOrderCard(order);
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text("Error: $e")),
+        loading: () => const Center(child: CircularProgressIndicator(color: DesignColors.primary)),
+        error: (err, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(DesignSpacing.xl),
+            child: Text('Error: $err', style: TextStyle(color: Colors.red.shade300)),
+          ),
+        ),
       ),
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending': return Colors.orange;
-      case 'confirmed': return Colors.blue;
-      case 'shipped': return Colors.purple;
-      case 'delivered': return Colors.green;
-      case 'cancelled': return Colors.red;
-      default: return Colors.grey;
-    }
+  Widget _buildOrderCard(Map<String, dynamic> order) {
+    final status = order['status'] ?? 'pending';
+    final color = status == 'delivered' ? Colors.green : (status == 'pending' ? Colors.orange : Colors.blue);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: DesignSpacing.m),
+      padding: const EdgeInsets.all(DesignSpacing.m),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DesignRadius.l),
+        border: Border.all(color: DesignColors.secondary),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Order #${order['id'].toString().substring(0, 8)}',
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(DesignRadius.s),
+                ),
+                child: Text(
+                  status.toUpperCase(),
+                  style: GoogleFonts.outfit(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: DesignSpacing.s),
+          Text(
+            'Total: \$${order['total_amount']}',
+            style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: DesignSpacing.s),
+          Text(
+            'Date: ${DateTime.parse(order['created_at']).toLocal().toString().substring(0, 16)}',
+            style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
   }
 }

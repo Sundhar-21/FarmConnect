@@ -1,181 +1,185 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:farmconnect/shared/design_constants.dart';
+import 'package:farmconnect/shared/widgets/farm_product_card.dart';
+import 'package:farmconnect/shared/widgets/category_chip.dart';
+import 'package:farmconnect/core/services/supabase_service.dart';
+import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
+import 'package:farmconnect/features/consumer/presentation/product_details_screen.dart';
 import 'package:farmconnect/features/consumer/data/product_provider.dart';
-import 'package:farmconnect/features/consumer/data/favorites_provider.dart';
+import 'package:farmconnect/features/consumer/data/cart_provider.dart';
 
-class SearchScreen extends ConsumerWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final categoriesAsync = ref.watch(categoriesProvider);
-    final productsAsync = ref.watch(productsProvider); // Using this for trending/popular
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
+}
 
+class _SearchScreenState extends ConsumerState<SearchScreen> {
+  String _selectedCategory = 'All Items';
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Farm Market", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: Navigator.canPop(context) ? IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: DesignColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ) : null,
+        title: Text('Local Markets', style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
-          const CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.green,
-            child: Icon(Icons.person, size: 20, color: Colors.white),
+          IconButton(
+            icon: const Icon(Icons.search, color: DesignColors.textPrimary),
+            onPressed: () {},
           ),
-          const SizedBox(width: 16),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_basket_outlined, color: DesignColors.textPrimary),
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CartScreen())),
+                  ),
+                  if (ref.watch(cartProvider).isNotEmpty)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: DesignColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: Text(
+                          '${ref.watch(cartProvider).length}',
+                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+          const SizedBox(width: DesignSpacing.s),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(productsProvider);
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        color: DesignColors.primary,
+        child: ListView(
           children: [
-            // Search Bar
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Search for products...",
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: const Icon(Icons.camera_alt_outlined),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: ["Filter", "Sort by", "Category", "Quantity"].map((e) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Chip(
-                    label: Text(e),
-                    backgroundColor: Colors.transparent,
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                )).toList(),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Browse Categories
-            Text("Browse Categories", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            categoriesAsync.when(
-              data: (categories) => ListView.separated(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: categories.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final cat = categories[index];
-                  return Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.fastfood, color: Colors.orange), // Placeholder icon
+            // Categories
+            const SizedBox(height: DesignSpacing.m),
+            SizedBox(
+              height: 50,
+              child: ref.watch(categoriesProvider).when(
+                data: (categories) {
+                  final allCategories = ['All Items', ...categories.map((c) => c['name'] as String)];
+                  return ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
+                    children: allCategories.map((cat) => Padding(
+                      padding: const EdgeInsets.only(right: DesignSpacing.s),
+                      child: CategoryChip(
+                        label: cat,
+                        isSelected: _selectedCategory == cat,
+                        onTap: () => setState(() => _selectedCategory = cat),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(cat['name'], style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-                            Text("100+ items", style: GoogleFonts.outfit(color: Colors.green, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.arrow_outward, size: 16, color: Colors.grey),
-                    ],
+                    )).toList(),
                   );
                 },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, stack) => const SizedBox(),
               ),
-              loading: () => const LinearProgressIndicator(),
-              error: (_, __) => const Text("Error loading categories"),
+            ),
+            const SizedBox(height: DesignSpacing.l),
+
+            // Product Grid
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
+              child: ref.watch(productsProvider).when(
+                data: (products) {
+                  final filteredProducts = products.where((p) {
+                    if (_selectedCategory == 'All Items') return true;
+                    return p['categories']?['name'] == _selectedCategory;
+                  }).toList();
+
+                  if (filteredProducts.isEmpty) {
+                    return const Center(child: Padding(
+                      padding: EdgeInsets.all(DesignSpacing.xl),
+                      child: Text('No results found'),
+                    ));
+                  }
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredProducts.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: DesignSpacing.m,
+                      mainAxisSpacing: DesignSpacing.m,
+                    ),
+                    itemBuilder: (context, index) {
+                      final product = filteredProducts[index];
+                      return FarmProductCard(
+                        product: product,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailsScreen(product: product),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('Error: $e')),
+              ),
             ),
 
-            const SizedBox(height: 24),
-            
-            // Trending Now (Using products for demo)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Trending Now", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text("See All", style: GoogleFonts.outfit(color: Colors.orange, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 180,
-              child: productsAsync.when(
-                data: (products) => ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: products.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 16),
-                  itemBuilder: (context, index) {
-                    final p = products[index];
-                    return Container(
-                      width: 140,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10)],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                color: Colors.grey.shade200,
-                                image: p['image_url'] != null ? DecorationImage(image: NetworkImage(p['image_url']), fit: BoxFit.cover) : null,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(p['name'] ?? '', style: GoogleFonts.outfit(fontWeight: FontWeight.bold), maxLines: 1),
-                                const SizedBox(height: 4),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("\$${p['price']}", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.green)),
-                                    GestureDetector(
-                                      onTap: () {
-                                        ref.read(favoritesProvider.notifier).toggleFavorite(p);
-                                      },
-                                      child: Icon(
-                                        ref.watch(favoritesProvider.notifier).isFavorite(p['id']) 
-                                            ? Icons.favorite 
-                                            : Icons.favorite_border, 
-                                        size: 16, 
-                                        color: ref.watch(favoritesProvider.notifier).isFavorite(p['id']) 
-                                            ? Colors.red 
-                                            : Colors.grey
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => const Text("Error loading trending"),
+            // Looking for more banner
+            Container(
+              margin: const EdgeInsets.all(DesignSpacing.l),
+              padding: const EdgeInsets.all(DesignSpacing.xl),
+              decoration: BoxDecoration(
+                color: DesignColors.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(DesignRadius.xl),
+                border: Border.all(color: DesignColors.primary.withOpacity(0.1)),
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.eco_rounded, color: DesignColors.primary, size: 40),
+                  const SizedBox(height: DesignSpacing.m),
+                  Text(
+                    'Looking for more?',
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const SizedBox(height: DesignSpacing.s),
+                  Text(
+                    'Discover what\'s in season right now at your local farms.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(color: DesignColors.textSecondary),
+                  ),
+                  const SizedBox(height: DesignSpacing.l),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: DesignColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignRadius.xl)),
+                    ),
+                    child: const Text('Browse Market'),
+                  ),
+                ],
               ),
             ),
           ],

@@ -1,22 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/features/consumer/presentation/home_screen.dart';
 import 'package:farmconnect/features/auth/presentation/profile_screen.dart';
-import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/favorites_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/search_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/orders_screen.dart';
-import 'package:farmconnect/features/consumer/data/cart_provider.dart';
-import 'package:farmconnect/features/consumer/data/favorites_provider.dart';
+import 'package:farmconnect/shared/widgets/custom_bottom_nav.dart';
+import 'package:farmconnect/features/consumer/data/navigation_provider.dart';
 
-// Placeholders for new screens
-class PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const PlaceholderScreen({super.key, required this.title});
-  @override
-  Widget build(BuildContext context) => Scaffold(body: Center(child: Text(title)));
-}
+import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
 
 class ConsumerMainScreen extends ConsumerStatefulWidget {
   const ConsumerMainScreen({super.key});
@@ -26,84 +19,71 @@ class ConsumerMainScreen extends ConsumerStatefulWidget {
 }
 
 class _ConsumerMainScreenState extends ConsumerState<ConsumerMainScreen> {
-  int _currentIndex = 0;
 
   final List<Widget> _screens = [
     const ConsumerHomeScreen(),
-    const SearchScreen(),
-    const CartScreen(),
+    const SearchScreen(), // Markets
     const FavoritesScreen(),
-    const ConsumerOrdersScreen(),
+    const CartScreen(),
     const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final cartCount = ref.watch(cartProvider).length;
-    final favoritesCount = ref.watch(favoritesProvider).length;
-    
-    return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed, // Needed for >3 items
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        selectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        unselectedLabelStyle: GoogleFonts.outfit(),
-        items: [
-          const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: "Home"),
-          const BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(
-            icon: _buildBadgeIcon(Icons.shopping_cart_outlined, cartCount), 
-            activeIcon: _buildBadgeIcon(Icons.shopping_cart, cartCount),
-            label: "Cart"
-          ),
-          BottomNavigationBarItem(
-            icon: _buildBadgeIcon(Icons.favorite_outline, favoritesCount), 
-            activeIcon: _buildBadgeIcon(Icons.favorite, favoritesCount),
-            label: "Favourites"
-          ),
-          const BottomNavigationBarItem(icon: Icon(Icons.receipt_long_outlined), activeIcon: Icon(Icons.receipt_long), label: "Orders"),
-          const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: "Profile"),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildBadgeIcon(IconData icon, int count) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Icon(icon),
-        if (count > 0)
-          Positioned(
-            right: -6,
-            top: -4,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              constraints: const BoxConstraints(
-                minWidth: 16,
-                minHeight: 16,
-              ),
-              child: Text(
-                count.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+    final currentIndex = ref.watch(navigationIndexProvider);
+
+    return PopScope(
+      canPop: currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ref.read(navigationIndexProvider.notifier).state = 0;
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: _screens[currentIndex],
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12, bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: CustomBottomNav(
+                    currentIndex: currentIndex,
+                    onTap: (index) => ref.read(navigationIndexProvider.notifier).state = index,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(32.5),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigate to Search or open search sheet
+                        ref.read(navigationIndexProvider.notifier).state = 1; // For now switch to Markets/Search tab
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 12, left: 4),
+                        width: 65,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E2E2E).withOpacity(0.8), // Match pill color
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.1),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: const Icon(Icons.search_rounded, color: Colors.white, size: 30),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-      ],
+        ),
+      ),
     );
   }
 }

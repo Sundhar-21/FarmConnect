@@ -11,11 +11,16 @@ class CartItem {
 class CartNotifier extends StateNotifier<List<CartItem>> {
   CartNotifier() : super([]);
 
-  void addToCart(Map<String, dynamic> product) {
-    if (state.any((item) => item.product['id'] == product['id'])) {
-      incrementQuantity(product['id']);
+  void addToCart(Map<String, dynamic> product, int quantity) {
+    final existingItemIndex = state.indexWhere((item) => item.product['id'] == product['id']);
+
+    if (existingItemIndex != -1) {
+      // Item already in cart, update its quantity
+      final existingItem = state[existingItemIndex];
+      updateQuantity(product['id'], existingItem.quantity + quantity);
     } else {
-      state = [...state, CartItem(product: product)];
+      // Item not in cart, add it with the specified quantity
+      state = [...state, CartItem(product: product, quantity: quantity)];
     }
   }
 
@@ -44,14 +49,27 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         else
           item
     ];
-    // Optional: remove if quantity goes to 0? For now keep at 1.
+  }
+
+  void updateQuantity(int productId, int newQuantity) {
+    if (newQuantity < 1) {
+      removeFromCart(productId);
+      return;
+    }
+    state = [
+      for (final item in state)
+        if (item.product['id'] == productId)
+          CartItem(product: item.product, quantity: newQuantity)
+        else
+          item
+    ];
   }
 
   double get totalPrice {
     return state.fold(0, (total, item) => total + (item.product['price'] * item.quantity));
   }
 
-  Future<void> checkout(SupabaseClient supabase) async {
+  Future<void> checkout(SupabaseClient supabase, String shippingAddress) async {
     if (state.isEmpty) return;
     
     // 1. Get User
@@ -61,9 +79,10 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     // 2. Create Order
     final total = totalPrice;
     final orderResponse = await supabase.from('orders').insert({
-      'consumer_id': user.id,
+      'user_id': user.id,
       'total_amount': total,
-      'status': 'pending'
+      'status': 'pending',
+      'shipping_address': shippingAddress,
     }).select().single();
 
     final orderId = orderResponse['id'];
@@ -74,12 +93,16 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
       'product_id': item.product['id'], // Assuming product has integer ID
       'farmer_id': item.product['farmer_id'], // Denormalized for farmer ease
       'quantity': item.quantity,
-      'price_at_purchase': item.product['price']
+      'price_at_time_of_order': item.product['price']
     }).toList();
 
     await supabase.from('order_items').insert(itemsData);
 
     // 4. Clear Cart
+    state = [];
+  }
+
+  void clearCart() {
     state = [];
   }
 }

@@ -1,0 +1,12 @@
+-- DEPRECATED: This policy causes infinite recursion
+-- DO NOT RUN THIS FILE
+-- 
+-- Instead, farmers will see customer delivery address from the orders.shipping_address field
+-- which doesn't require accessing the profiles table directly.
+--
+-- The infinite recursion occurs because:
+-- 1. Policy is on profiles table
+-- 2. Policy checks orders.user_id = profiles.id
+-- 3. This creates circular dependency when checking profile access
+
+-- No policy needed - farmers can see shipping address from orders table directly

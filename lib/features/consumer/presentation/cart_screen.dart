@@ -1,306 +1,334 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/features/consumer/data/cart_provider.dart';
+import 'package:farmconnect/shared/design_constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:farmconnect/features/consumer/presentation/order_success_screen.dart';
+import 'package:farmconnect/features/auth/data/profile_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class CartScreen extends ConsumerStatefulWidget {
+class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
   @override
-  ConsumerState<CartScreen> createState() => _CartScreenState();
-}
-
-class _CartScreenState extends ConsumerState<CartScreen> {
-  bool _isOnline = true; // For the toggle
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
-    final notifier = ref.read(cartProvider.notifier);
-    final totalPrice = notifier.totalPrice;
-    final primaryColor = Theme.of(context).primaryColor;
-    const accentColor = Color(0xFFFFC107); // Amber for buttons/highlights
+    final totalPrice = ref.watch(cartProvider.notifier).totalPrice;
+    final profileAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Cart (${cartItems.length})", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: Navigator.canPop(context) ? IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: DesignColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
+        ) : null,
+        title: Text('Your Basket', style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {}),
+          TextButton(
+            onPressed: () => ref.read(cartProvider.notifier).clearCart(),
+            child: Text('Clear All', style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(width: DesignSpacing.m),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
+      body: cartItems.isEmpty
+          ? _buildEmptyState()
+          : Column(
               children: [
-                // Search Bar
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search",
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Toggle Buttons
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l, vertical: DesignSpacing.m),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _isOnline = true),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: _isOnline ? accentColor : Colors.transparent,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Online",
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  color: _isOnline ? Colors.white : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      Text(
+                        '${cartItems.length} items from 2 local farms',
+                        style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16),
                       ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _isOnline = false),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: !_isOnline ? accentColor : Colors.transparent,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Store",
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  color: !_isOnline ? Colors.white : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: cartItems.length,
+                    padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
+                    itemBuilder: (context, index) {
+                      final item = cartItems[index];
+                      return _buildCartItem(context, ref, item);
+                    },
+                  ),
+                ),
+                _buildCarbonFootprint(),
+                _buildCheckoutPanel(context, ref, totalPrice, profileAsync.value?['address'] ?? 'No Address Provided'),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.shopping_basket_outlined,
+            size: 80,
+            color: DesignColors.textSecondary.withOpacity(0.2),
+          ),
+          const SizedBox(height: DesignSpacing.m),
+          Text(
+            'Your basket is empty',
+            style: GoogleFonts.outfit(
+              color: DesignColors.textSecondary,
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartItem(BuildContext context, WidgetRef ref, CartItem item) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: DesignSpacing.l),
+      child: Row(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: DesignColors.surface,
+              borderRadius: BorderRadius.circular(DesignRadius.m),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(DesignRadius.m),
+              child: CachedNetworkImage(
+                imageUrl: item.product['image_url'] ?? '',
+                fit: BoxFit.cover,
+                memCacheWidth: 200,
+                errorWidget: (context, url, error) => const Icon(Icons.eco, color: DesignColors.primary),
+                placeholder: (context, url) => Container(color: DesignColors.surface),
+              ),
+            ),
+          ),
+          const SizedBox(width: DesignSpacing.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.product['name'] ?? 'Product',
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.eco_rounded, size: 14, color: DesignColors.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Sunny Peaks Farm',
+                      style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${item.product['unit'] ?? '500g'} bag',
+                  style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '\$${(item.product['price'] * item.quantity).toStringAsFixed(2)}',
+                style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: DesignColors.surface,
+                  borderRadius: BorderRadius.circular(DesignRadius.s),
+                ),
+                child: Row(
+                  children: [
+                    _buildQtyBtn(context, ref, item.product['id'], item.quantity - 1, Icons.remove),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('${item.quantity}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                    ),
+                    _buildQtyBtn(context, ref, item.product['id'], item.quantity + 1, Icons.add, isPrimary: true),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQtyBtn(BuildContext context, WidgetRef ref, int productId, int newQty, IconData icon, {bool isPrimary = false}) {
+    return GestureDetector(
+      onTap: () => ref.read(cartProvider.notifier).updateQuantity(productId, newQty),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: isPrimary ? DesignColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Icon(icon, size: 16, color: isPrimary ? Colors.white : DesignColors.textPrimary),
+      ),
+    );
+  }
+
+  Widget _buildCarbonFootprint() {
+    return Container(
+      margin: const EdgeInsets.all(DesignSpacing.l),
+      padding: const EdgeInsets.all(DesignSpacing.m),
+      decoration: BoxDecoration(
+        color: DesignColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(DesignRadius.m),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: DesignColors.primary.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.eco_rounded, color: DesignColors.primary, size: 24),
+          ),
+          const SizedBox(width: DesignSpacing.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Carbon Footprint Saved', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+                    children: [
+                      const TextSpan(text: 'You saved '),
+                      TextSpan(text: '2.4kg of CO2', style: TextStyle(color: DesignColors.primary, fontWeight: FontWeight.bold)),
+                      const TextSpan(text: ' by shopping directly from local farms.'),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          Expanded(
-            child: cartItems.isEmpty 
-              ? Center(child: Text("Your cart is empty", style: GoogleFonts.outfit(fontSize: 18, color: Colors.grey)))
-              : ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: cartItems.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final item = cartItems[index];
-                    final product = item.product;
-                    
-                    return Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.grey.shade100, blurRadius: 10, offset: const Offset(0, 5))],
-                      ),
-                      child: Row(
-                        children: [
-                          // Image
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(12),
-                              image: product['image_url'] != null 
-                                ? DecorationImage(image: NetworkImage(product['image_url']), fit: BoxFit.cover)
-                                : null,
-                            ),
-                            child: product['image_url'] == null 
-                              ? const Icon(Icons.image, color: Colors.grey) 
-                              : null,
-                          ),
-                          const SizedBox(width: 16),
-                          
-                          // Details
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        product['name'] ?? 'Unknown',
-                                        style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                                  ],
-                                ),
-                                Text(
-                                  product['category'] ?? 'Fresh Farm',
-                                  style: GoogleFonts.outfit(color: Colors.grey, fontSize: 12),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "\$${product['price']}",
-                                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
-                                    ),
-                                    Row(
-                                      children: [
-                                        _QtyBtn(
-                                          icon: Icons.remove, 
-                                          onTap: () => notifier.decrementQuantity(product['id']),
-                                          isAdd: false,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                          child: Text("${item.quantity}", style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                                        ),
-                                        _QtyBtn(
-                                          icon: Icons.add, 
-                                          onTap: () => notifier.incrementQuantity(product['id']),
-                                          isAdd: true,
-                                          color: accentColor,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-          ),
-          
-          // Bottom Checkout Bar
-          if (cartItems.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
-                    child: Text("${cartItems.length}", style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    "\$${totalPrice.toStringAsFixed(2)}",
-                    style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-                    child: const Icon(Icons.chat_bubble_outline, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          final supabase = ref.read(supabaseProvider);
-                          await ref.read(cartProvider.notifier).checkout(supabase);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Order placed successfully!"))
-                            );
-                            Navigator.pop(context);
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Checkout failed: $e"))
-                            );
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Buy", style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_outward, color: Colors.white, size: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
   }
-}
 
-class _QtyBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isAdd;
-  final Color? color;
-
-  const _QtyBtn({required this.icon, required this.onTap, required this.isAdd, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: color ?? Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(color: isAdd ? Colors.transparent : Colors.grey.shade300),
-        ),
-        child: Icon(icon, size: 16, color: isAdd ? Colors.white : Colors.grey),
+  Widget _buildCheckoutPanel(BuildContext context, WidgetRef ref, double total, String shippingAddress) {
+    const deliveryFee = 2.50;
+    
+    return Container(
+      padding: const EdgeInsets.all(DesignSpacing.l),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(DesignRadius.xxl)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildSummaryRow('Subtotal', '\$${total.toStringAsFixed(2)}'),
+          const SizedBox(height: DesignSpacing.s),
+          _buildSummaryRow('Delivery Fee', '\$${deliveryFee.toStringAsFixed(2)}'),
+          const Divider(height: DesignSpacing.xl),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Total', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text('\$${(total + deliveryFee).toStringAsFixed(2)}', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: DesignSpacing.m),
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined, color: DesignColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Shipping to: $shippingAddress',
+                  style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: DesignSpacing.m),
+          
+          Row(
+            children: [
+              const Icon(Icons.access_time_rounded, color: DesignColors.textSecondary, size: 20),
+              const SizedBox(width: DesignSpacing.s),
+              Text('Next: Tomorrow, 8am-10am', style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontWeight: FontWeight.w500)),
+              const Spacer(),
+              TextButton(onPressed: () {}, child: Text('CHANGE', style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold))),
+            ],
+          ),
+          const SizedBox(height: DesignSpacing.m),
+
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final supabase = ref.read(supabaseProvider);
+                await ref.read(cartProvider.notifier).checkout(supabase, shippingAddress);
+                if (context.mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OrderSuccessScreen()),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF008000), 
+              padding: const EdgeInsets.symmetric(vertical: 18),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Place Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_rounded),
+              ],
+            ),
+          ),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16)),
+        Text(value, style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }

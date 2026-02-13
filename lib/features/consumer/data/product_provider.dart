@@ -5,7 +5,7 @@ final productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async 
   final supabase = ref.watch(supabaseProvider);
   final response = await supabase
       .from('products')
-      .select('*, profiles!farmer_id(full_name)')
+      .select('*, categories(*)')
       .eq('is_available', true)
       .order('created_at', ascending: false);
   return List<Map<String, dynamic>>.from(response);
