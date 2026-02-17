@@ -279,4 +279,53 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get tryAgain => 'மீண்டும் முயற்சி செய்';
+
+  @override
+  String get home => 'முகப்பு';
+
+  @override
+  String get markets => 'சந்தைகள்';
+
+  @override
+  String get all => 'அனைத்தும்';
+
+  @override
+  String get vegetables => 'காய்கறிகள்';
+
+  @override
+  String get fruits => 'பழங்கள்';
+
+  @override
+  String get meat => 'இறைச்சி';
+
+  @override
+  String get grains => 'தானியங்கள்';
+
+  @override
+  String get dairy => 'பால் பொருட்கள்';
+
+  @override
+  String get others => 'மற்றவை';
+
+  @override
+  String get localMarkets => 'உள்ளூர் சந்தைகள்';
+
+  @override
+  String get findFreshProduce =>
+      'உங்களுக்கு அருகில் உள்ள புதிய விளைபொருட்களைக் கண்டறியவும்';
+
+  @override
+  String get searchItems => 'பொருட்களைத் தேடுங்கள்...';
+
+  @override
+  String get allItems => 'அனைத்து பொருட்கள்';
+
+  @override
+  String get kannada => 'Kannada';
+
+  @override
+  String get telugu => 'Telugu';
+
+  @override
+  String get malayalam => 'Malayalam';
 }

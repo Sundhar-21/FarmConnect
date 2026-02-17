@@ -31,6 +31,21 @@ const List<LanguageOption> supportedLanguages = [
     name: 'Hindi',
     nativeName: 'हिंदी',
   ),
+  LanguageOption(
+    code: 'kn',
+    name: 'Kannada',
+    nativeName: 'ಕನ್ನಡ',
+  ),
+  LanguageOption(
+    code: 'te',
+    name: 'Telugu',
+    nativeName: 'తెలుగు',
+  ),
+  LanguageOption(
+    code: 'ml',
+    name: 'Malayalam',
+    nativeName: 'മലയാളം',
+  ),
 ];
 
 String getLanguageNameFromCode(String code) {
@@ -41,6 +56,12 @@ String getLanguageNameFromCode(String code) {
       return 'தமிழ்';
     case 'hi':
       return 'हिंदी';
+    case 'kn':
+      return 'ಕನ್ನಡ';
+    case 'te':
+      return 'తెలుగు';
+    case 'ml':
+      return 'മലയാളം';
     default:
       return 'English';
   }

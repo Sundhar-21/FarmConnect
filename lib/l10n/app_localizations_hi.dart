@@ -279,4 +279,52 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get tryAgain => 'पुनः प्रयास करें';
+
+  @override
+  String get home => 'होम';
+
+  @override
+  String get markets => 'बाज़ार';
+
+  @override
+  String get all => 'सभी';
+
+  @override
+  String get vegetables => 'सब्जियां';
+
+  @override
+  String get fruits => 'फल';
+
+  @override
+  String get meat => 'मांस';
+
+  @override
+  String get grains => 'अनाज';
+
+  @override
+  String get dairy => 'डेयरी';
+
+  @override
+  String get others => 'अन्य';
+
+  @override
+  String get localMarkets => 'स्थानीय बाज़ार';
+
+  @override
+  String get findFreshProduce => 'अपने आस-पास ताज़ा उपज खोजें';
+
+  @override
+  String get searchItems => 'वस्तुएं खोजें...';
+
+  @override
+  String get allItems => 'सभी वस्तुएं';
+
+  @override
+  String get kannada => 'Kannada';
+
+  @override
+  String get telugu => 'Telugu';
+
+  @override
+  String get malayalam => 'Malayalam';
 }

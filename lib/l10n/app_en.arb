@@ -89,5 +89,21 @@
   "retry": "Retry",
   "somethingWentWrong": "Something went wrong",
   "noInternetConnection": "No internet connection",
-  "tryAgain": "Try Again"
+  "tryAgain": "Try Again",
+  "home": "Home",
+  "markets": "Markets",
+  "all": "All",
+  "vegetables": "Vegetables",
+  "fruits": "Fruits",
+  "meat": "Meat",
+  "grains": "Grains",
+  "dairy": "Dairy",
+  "others": "Others",
+  "localMarkets": "Local Markets",
+  "findFreshProduce": "Find fresh produce near you",
+  "searchItems": "Search items...",
+  "allItems": "All Items",
+  "kannada": "Kannada",
+  "telugu": "Telugu",
+  "malayalam": "Malayalam"
 }

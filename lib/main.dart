@@ -40,10 +40,21 @@ class _FarmConnectAppState extends ConsumerState<FarmConnectApp> {
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
       locale: locale,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: child!,
+        );
+      },
       supportedLocales: [
         const Locale('en'),
         const Locale('ta'),
         const Locale('hi'),
+        const Locale('kn'),
+        const Locale('te'),
+        const Locale('ml'),
       ],
       localizationsDelegates: [
         AppLocalizations.delegate,

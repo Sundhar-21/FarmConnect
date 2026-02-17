@@ -280,4 +280,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tryAgain => 'Try Again';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get markets => 'Markets';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get vegetables => 'Vegetables';
+
+  @override
+  String get fruits => 'Fruits';
+
+  @override
+  String get meat => 'Meat';
+
+  @override
+  String get grains => 'Grains';
+
+  @override
+  String get dairy => 'Dairy';
+
+  @override
+  String get others => 'Others';
+
+  @override
+  String get localMarkets => 'Local Markets';
+
+  @override
+  String get findFreshProduce => 'Find fresh produce near you';
+
+  @override
+  String get searchItems => 'Search items...';
+
+  @override
+  String get allItems => 'All Items';
+
+  @override
+  String get kannada => 'Kannada';
+
+  @override
+  String get telugu => 'Telugu';
+
+  @override
+  String get malayalam => 'Malayalam';
 }

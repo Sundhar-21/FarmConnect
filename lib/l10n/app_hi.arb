@@ -89,5 +89,18 @@
   "retry": "पुनः प्रयास करें",
   "somethingWentWrong": "कुछ गलत हो गया",
   "noInternetConnection": "इंटरनेट कनेक्शन नहीं है",
-  "tryAgain": "पुनः प्रयास करें"
+  "tryAgain": "पुनः प्रयास करें",
+  "home": "होम",
+  "markets": "बाज़ार",
+  "all": "सभी",
+  "vegetables": "सब्जियां",
+  "fruits": "फल",
+  "meat": "मांस",
+  "grains": "अनाज",
+  "dairy": "डेयरी",
+  "others": "अन्य",
+  "localMarkets": "स्थानीय बाज़ार",
+  "findFreshProduce": "अपने आस-पास ताज़ा उपज खोजें",
+  "searchItems": "वस्तुएं खोजें...",
+  "allItems": "सभी वस्तुएं"
 }

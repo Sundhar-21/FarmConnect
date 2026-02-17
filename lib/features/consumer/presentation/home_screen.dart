@@ -244,24 +244,42 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
 
             categoriesAsync.when(
               data: (categories) {
-                final allCategories = ['All', ...categories.map((c) => c['name'] as String)];
+                // Define the forced order of categories as per requirement
+                final forcedOrder = ['All', 'Vegetables', 'Fruits', 'Meat', 'Grains', 'Dairy', 'Others'];
+                
+                // Helper to get localized name
+                String getLocalizedName(String dbName) {
+                  switch (dbName) {
+                    case 'All': return context.tr('all');
+                    case 'Vegetables': return context.tr('vegetables');
+                    case 'Fruits': return context.tr('fruits');
+                    case 'Meat': return context.tr('meat');
+                    case 'Grains': return context.tr('grains');
+                    case 'Dairy': return context.tr('dairy');
+                    case 'Others': return context.tr('others');
+                    default: return dbName;
+                  }
+                }
+
                 return SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.m),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
-                        children: allCategories.map((cat) => Padding(
-                          padding: const EdgeInsets.only(right: DesignSpacing.s),
-                          child: CategoryChip(
-                            label: cat,
-                            isSelected: _selectedCategory == cat,
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              setState(() => _selectedCategory = cat);
-                            },
-                          ),
-                        )).toList(),
+                        children: forcedOrder.map((catName) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: DesignSpacing.s),
+                            child: CategoryChip(
+                              label: getLocalizedName(catName),
+                              isSelected: _selectedCategory == catName,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                setState(() => _selectedCategory = catName);
+                              },
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
                   ),

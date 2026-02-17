@@ -145,9 +145,6 @@ class ProfileScreen extends ConsumerWidget {
                           }
                         }),
                         _MenuItem(Icons.payment_outlined, context.tr('paymentMethods'), () {}),
-                      ]),
-                      const SizedBox(height: DesignSpacing.m),
-                      _buildMenuSection([
                         _MenuItem(Icons.language_outlined, context.tr('language'), () {
                           _showLanguageBottomSheet(context, ref);
                         }),
@@ -412,6 +409,12 @@ String _getFlagEmoji(String code) {
     case 'ta':
       return '🇮🇳';
     case 'hi':
+      return '🇮🇳';
+    case 'kn':
+      return '🇮🇳';
+    case 'te':
+      return '🇮🇳';
+    case 'ml':
       return '🇮🇳';
     default:
       return '🇬🇧';

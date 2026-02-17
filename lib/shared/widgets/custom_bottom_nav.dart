@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/shared/design_constants.dart';
 import 'package:farmconnect/features/consumer/data/cart_provider.dart';
 import 'package:farmconnect/features/consumer/data/favorites_provider.dart';
+import 'package:farmconnect/core/l10n/app_localizations.dart';
 
 class CustomBottomNav extends ConsumerWidget {
   final int currentIndex;
@@ -53,11 +54,11 @@ class CustomBottomNav extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_rounded, 'Home'),
-                _buildNavItem(1, Icons.storefront_rounded, 'Markets'),
-                _buildNavItem(2, Icons.favorite_rounded, 'Favorites'),
-                _buildNavItem(3, Icons.shopping_basket_rounded, 'Cart', badge: cartCount > 0 ? cartCount : null),
-                _buildNavItem(4, Icons.person_rounded, 'Profile'),
+                _buildNavItem(0, Icons.home_rounded, context.tr('home')),
+                _buildNavItem(1, Icons.storefront_rounded, context.tr('markets')),
+                _buildNavItem(2, Icons.favorite_rounded, context.tr('favorites')),
+                _buildNavItem(3, Icons.shopping_basket_rounded, context.tr('cart'), badge: cartCount > 0 ? cartCount : null),
+                _buildNavItem(4, Icons.person_rounded, context.tr('profile')),
               ],
             ),
           ),

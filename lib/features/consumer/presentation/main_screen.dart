@@ -8,6 +8,7 @@ import 'package:farmconnect/features/consumer/presentation/search_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/orders_screen.dart';
 import 'package:farmconnect/shared/widgets/custom_bottom_nav.dart';
 import 'package:farmconnect/features/consumer/data/navigation_provider.dart';
+import 'package:farmconnect/shared/widgets/voice_button.dart';
 
 import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
 
@@ -40,7 +41,16 @@ class _ConsumerMainScreenState extends ConsumerState<ConsumerMainScreen> {
       },
       child: Scaffold(
         extendBody: true,
-        body: _screens[currentIndex],
+        body: Stack(
+          children: [
+            _screens[currentIndex],
+            Positioned(
+              right: 16,
+              bottom: 80,
+              child: const VoiceButton(),
+            ),
+          ],
+        ),
         bottomNavigationBar: SafeArea(
           top: false,
           child: Padding(

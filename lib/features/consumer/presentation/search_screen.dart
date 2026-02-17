@@ -9,6 +9,7 @@ import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/product_details_screen.dart';
 import 'package:farmconnect/features/consumer/data/product_provider.dart';
 import 'package:farmconnect/features/consumer/data/cart_provider.dart';
+import 'package:farmconnect/core/l10n/app_localizations.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -18,7 +19,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 }
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
-  String _selectedCategory = 'All Items';
+  String _selectedCategory = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Local Markets',
+                            context.tr('localMarkets'),
                             style: GoogleFonts.outfit(
                               color: DesignColors.textPrimary,
                               fontSize: 28,
@@ -56,7 +57,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Find fresh produce near you',
+                            context.tr('findFreshProduce'),
                             style: GoogleFonts.outfit(
                               color: DesignColors.textSecondary,
                               fontSize: 14,
@@ -104,16 +105,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 height: 50,
                 child: ref.watch(categoriesProvider).when(
                   data: (categories) {
-                    final allCategories = ['All Items', ...categories.map((c) => c['name'] as String)];
+                    // Define the forced order of categories
+                    final forcedOrder = ['All', 'Vegetables', 'Fruits', 'Meat', 'Grains', 'Dairy', 'Others'];
+                    
+                     // Helper to get localized name
+                    String getLocalizedName(String dbName) {
+                      switch (dbName) {
+                        case 'All': return context.tr('all');
+                        case 'Vegetables': return context.tr('vegetables');
+                        case 'Fruits': return context.tr('fruits');
+                        case 'Meat': return context.tr('meat');
+                        case 'Grains': return context.tr('grains');
+                        case 'Dairy': return context.tr('dairy');
+                        case 'Others': return context.tr('others');
+                        default: return dbName;
+                      }
+                    }
+
                     return ListView(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.m),
-                      children: allCategories.map((cat) => Padding(
+                      children: forcedOrder.map((catName) => Padding(
                         padding: const EdgeInsets.only(right: DesignSpacing.s),
                         child: CategoryChip(
-                          label: cat,
-                          isSelected: _selectedCategory == cat,
-                          onTap: () => setState(() => _selectedCategory = cat),
+                          label: getLocalizedName(catName),
+                          isSelected: _selectedCategory == catName || (_selectedCategory == 'All Items' && catName == 'All'),
+                          onTap: () => setState(() => _selectedCategory = catName),
                         ),
                       )).toList(),
                     );
@@ -127,7 +144,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 child: ref.watch(productsProvider).when(
                   data: (products) {
                     final filteredProducts = products.where((p) {
-                      if (_selectedCategory == 'All Items') return true;
+                      if (_selectedCategory == 'All' || _selectedCategory == 'All Items') return true;
                       return p['categories']?['name'] == _selectedCategory;
                     }).toList();
 
