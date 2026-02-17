@@ -5,6 +5,7 @@ import 'package:farmconnect/shared/design_constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:farmconnect/features/consumer/data/cart_provider.dart';
 import 'package:farmconnect/features/consumer/data/favorites_provider.dart';
+import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> product;
@@ -281,7 +282,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                 Text('\$${(widget.product['price'] * _quantity).toStringAsFixed(2)}', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
               ],
             ),
-            const SizedBox(width: DesignSpacing.xl),
+            const SizedBox(width: DesignSpacing.m),
             Expanded(
               child: ScaleTransition(
                 scale: _cartScaleAnimation,
@@ -301,18 +302,50 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: DesignColors.primary,
+                      backgroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(DesignRadius.m),
+                        side: const BorderSide(color: DesignColors.primary, width: 2),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.shopping_basket_rounded, color: Colors.white),
+                        const Icon(Icons.shopping_cart_outlined, color: DesignColors.primary),
                         const SizedBox(width: 8),
-                        Text('Add to Basket', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text('Add to Cart', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: DesignColors.primary)),
                       ],
                     ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: DesignSpacing.m),
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final cartNotifier = ref.read(cartProvider.notifier);
+                    cartNotifier.addToCart(widget.product, _quantity);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: DesignColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignRadius.m)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.bolt_rounded, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Text('Buy Now', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
                   ),
                 ),
               ),

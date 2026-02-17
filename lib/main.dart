@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:farmconnect/core/theme/app_theme.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
+import 'package:farmconnect/core/l10n/app_localizations.dart';
 import 'package:farmconnect/features/auth/presentation/login_screen.dart';
-import 'package:farmconnect/features/consumer/presentation/home_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/main_screen.dart';
 import 'package:farmconnect/features/auth/data/auth_provider.dart';
-
+import 'package:farmconnect/features/auth/data/language_provider.dart';
 import 'package:farmconnect/features/farmer/presentation/home_screen.dart';
 import 'package:farmconnect/features/auth/data/profile_provider.dart';
 
@@ -22,51 +23,80 @@ void main() async {
   runApp(const ProviderScope(child: FarmConnectApp()));
 }
 
-class FarmConnectApp extends ConsumerWidget {
+class FarmConnectApp extends ConsumerStatefulWidget {
   const FarmConnectApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
+  ConsumerState<FarmConnectApp> createState() => _FarmConnectAppState();
+}
+
+class _FarmConnectAppState extends ConsumerState<FarmConnectApp> {
+  @override
+  Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp(
       title: 'FarmConnect',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: authState.when(
-        data: (state) {
-          final user = state.session?.user;
-          if (user != null) {
-            // User is logged in, now check their role
-            final profileAsync = ref.watch(userProfileProvider);
-            
-            return profileAsync.when(
-              data: (profile) {
-                if (profile == null) return const LoginScreen();
-                
-                if (profile['role'] == 'farmer') {
-                  return const FarmerHomeScreen();
-                } else {
-                  return const ConsumerMainScreen();
-                }
-              },
-              loading: () => const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
+      locale: locale,
+      supportedLocales: [
+        const Locale('en'),
+        const Locale('ta'),
+        const Locale('hi'),
+      ],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: const AuthWrapper(),
+    );
+  }
+}
+
+class AuthWrapper extends ConsumerWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
+    return authState.when(
+      data: (state) {
+        final user = state.session?.user;
+        if (user != null) {
+          final profileAsync = ref.watch(userProfileProvider);
+          
+          return profileAsync.when(
+            data: (profile) {
+              if (profile == null) return const LoginScreen();
+              
+              if (profile['role'] == 'farmer') {
+                return const FarmerHomeScreen();
+              } else {
+                return const ConsumerMainScreen();
+              }
+            },
+            loading: () => const Scaffold(
+              backgroundColor: Color(0xFFF8FAF8),
+              body: Center(
+                child: CircularProgressIndicator(color: Color(0xFF28D339)),
               ),
-              error: (e, s) => Scaffold(
-                body: Center(child: Text("Profile Error: $e")),
-              ),
-            );
-          }
-          return const LoginScreen();
-        },
-        loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-        error: (e, s) => Scaffold(
-          body: Center(child: Text("Auth Error: $e")),
+            ),
+            error: (e, s) => const LoginScreen(),
+          );
+        }
+        return const LoginScreen();
+      },
+      loading: () => const Scaffold(
+        backgroundColor: Color(0xFFF8FAF8),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF28D339)),
         ),
       ),
+      error: (e, s) => const LoginScreen(),
     );
   }
 }

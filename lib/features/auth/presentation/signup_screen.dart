@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/features/auth/data/auth_provider.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:farmconnect/shared/design_constants.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -16,147 +17,310 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
   String _selectedRole = 'consumer';
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Account")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Join FarmConnect",
-              style: GoogleFonts.outfit(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            const SizedBox(height: 32),
-            TextField(
-              controller: _fullNameController,
-              decoration: const InputDecoration(
-                labelText: "Full Name",
-                prefixIcon: Icon(Icons.person_outline),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                prefixIcon: Icon(Icons.email_outlined),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Password",
-                prefixIcon: Icon(Icons.lock_outline),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              "I am a:",
-              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF0FFF0),
+              Color(0xFFFFFFFF),
+              Color(0xFFF8FFF8),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _RoleCard(
-                    label: "Consumer",
-                    icon: Icons.shopping_bag_outlined,
-                    isSelected: _selectedRole == 'consumer',
-                    onTap: () => setState(() => _selectedRole = 'consumer'),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(DesignRadius.m),
+                      boxShadow: DesignShadows.small,
+                    ),
+                    child: const Icon(Icons.arrow_back_ios_new, size: 18),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _RoleCard(
-                    label: "Farmer",
-                    icon: Icons.agriculture,
-                    isSelected: _selectedRole == 'farmer',
-                    onTap: () => setState(() => _selectedRole = 'farmer'),
+                const SizedBox(height: 16),
+                Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: DesignGradients.primaryGradient,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: DesignShadows.glow,
+                    ),
+                    child: const Icon(
+                      Icons.eco_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                Center(
+                  child: Text(
+                    "Create Account",
+                    style: GoogleFonts.outfit(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: DesignColors.textPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    "Join the FarmConnect family",
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      color: DesignColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                _buildInputField(
+                  controller: _fullNameController,
+                  label: "Full Name",
+                  hint: "Enter your full name",
+                  prefixIcon: Icons.person_outline,
+                ),
+                const SizedBox(height: 20),
+                _buildInputField(
+                  controller: _emailController,
+                  label: "Email",
+                  hint: "Enter your email",
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 20),
+                _buildInputField(
+                  controller: _passwordController,
+                  label: "Password",
+                  hint: "Create a password",
+                  prefixIcon: Icons.lock_outline,
+                  suffixIcon: _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  obscureText: _obscurePassword,
+                  onSuffixTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  "I want to join as:",
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: DesignColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _RoleCard(
+                        label: "Consumer",
+                        icon: Icons.shopping_bag_outlined,
+                        subtitle: "Buy fresh produce",
+                        isSelected: _selectedRole == 'consumer',
+                        onTap: () => setState(() => _selectedRole = 'consumer'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _RoleCard(
+                        label: "Farmer",
+                        icon: Icons.agriculture_rounded,
+                        subtitle: "Sell your products",
+                        isSelected: _selectedRole == 'farmer',
+                        onTap: () => setState(() => _selectedRole = 'farmer'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: DesignGradients.primaryGradient,
+                    borderRadius: BorderRadius.circular(DesignRadius.xxl),
+                    boxShadow: DesignShadows.glow,
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: authState.isLoading
+                          ? null
+                          : () async {
+                              final authNotifier = ref.read(authNotifierProvider.notifier);
+                              try {
+                                await authNotifier.signUp(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                  {
+                                    'full_name': _fullNameController.text,
+                                    'role': _selectedRole,
+                                  },
+                                );
+                                
+                                if (mounted) {
+                                   final user = ref.read(supabaseProvider).auth.currentUser;
+                                   if (user != null) {
+                                     final supabase = ref.read(supabaseProvider);
+                                     
+                                     try {
+                                       await supabase.from('profiles').insert({
+                                         'id': user.id,
+                                         'full_name': _fullNameController.text,
+                                         'role': _selectedRole,
+                                       });
+                                     } catch (e) {
+                                       debugPrint("Error creating profile: $e");
+                                     }
+
+                                     try {
+                                       if (_selectedRole == 'farmer') {
+                                          await supabase.from('farmer_profiles').insert({
+                                            'profile_id': user.id, 
+                                            'farm_name': 'My Farm',
+                                            'farm_location': 'Unknown'
+                                          });
+                                       } else {
+                                          await supabase.from('consumer_profiles').insert({
+                                            'profile_id': user.id
+                                          });
+                                       }
+                                     } catch (e) {
+                                       debugPrint("Error creating sub-profile: $e");
+                                     }
+                                   }
+
+                                   ScaffoldMessenger.of(context).showSnackBar(
+                                     const SnackBar(content: Text('Account created! Logging you in...')),
+                                   );
+                                }
+                              } catch (e) {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   SnackBar(content: Text('Signup Failed: $e')),
+                                 );
+                              }
+                            },
+                      borderRadius: BorderRadius.circular(DesignRadius.xxl),
+                      child: Center(
+                        child: authState.isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                "Create Account",
+                                style: GoogleFonts.outfit(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Already have an account? ",
+                      style: GoogleFonts.outfit(
+                        color: DesignColors.textSecondary,
+                        fontSize: 15,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Text(
+                        "Login",
+                        style: GoogleFonts.outfit(
+                          color: DesignColors.primaryDark,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenHeight * 0.05),
               ],
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: authState.isLoading
-                  ? null
-                  : () async {
-                      final authNotifier = ref.read(authNotifierProvider.notifier);
-                      try {
-                        await authNotifier.signUp(
-                          _emailController.text,
-                          _passwordController.text,
-                          {
-                            'full_name': _fullNameController.text,
-                            'role': _selectedRole,
-                          },
-                        );
-                        
-                        // User signed up, now let's ensure the profile exists (Manual Backup to Trigger)
-                        // This fixes the "Data not stored" issue if the SQL trigger fails.
-                        if (mounted) {
-                           final user = ref.read(supabaseProvider).auth.currentUser;
-                           if (user != null) {
-                             final supabase = ref.read(supabaseProvider);
-                             
-                             // 1. Create Main Profile
-                             try {
-                               await supabase.from('profiles').insert({
-                                 'id': user.id,
-                                 'full_name': _fullNameController.text,
-                                 'role': _selectedRole,
-                               });
-                             } catch (e) {
-                               debugPrint("Error creating profile: $e");
-                             }
+          ),
+        ),
+      ),
+    );
+  }
 
-                             // 2. Create Sub-Profile
-                             try {
-                               if (_selectedRole == 'farmer') {
-                                  await supabase.from('farmer_profiles').insert({
-                                    'profile_id': user.id, 
-                                    'farm_name': 'My Farm',
-                                    'farm_location': 'Unknown'
-                                  });
-                               } else {
-                                  await supabase.from('consumer_profiles').insert({
-                                    'profile_id': user.id
-                                  });
-                               }
-                             } catch (e) {
-                               debugPrint("Error creating sub-profile: $e");
-                             }
-                           }
-
-                           // Navigate or show success
-                           // The main.dart stream will handle redirection, but we can show a snackbar
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             const SnackBar(content: Text('Account created! Logging you in...')),
-                           );
-                        }
-                      } catch (e) {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                           SnackBar(content: Text('Signup Failed: $e')),
-                         );
-                      }
-                    },
-              child: authState.isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Sign Up"),
-            ),
-          ],
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData prefixIcon,
+    IconData? suffixIcon,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    VoidCallback? onSuffixTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DesignRadius.l),
+        boxShadow: DesignShadows.small,
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          labelStyle: GoogleFonts.outfit(color: DesignColors.textSecondary),
+          hintStyle: GoogleFonts.outfit(color: DesignColors.textTertiary),
+          prefixIcon: Icon(prefixIcon, color: DesignColors.primary),
+          suffixIcon: suffixIcon != null
+              ? IconButton(
+                  icon: Icon(suffixIcon, color: DesignColors.textSecondary),
+                  onPressed: onSuffixTap,
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(DesignRadius.l),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(DesignRadius.l),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(DesignRadius.l),
+            borderSide: const BorderSide(color: DesignColors.primary, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
         ),
       ),
     );
@@ -166,12 +330,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 class _RoleCard extends StatelessWidget {
   final String label;
   final IconData icon;
+  final String subtitle;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _RoleCard({
     required this.label,
     required this.icon,
+    required this.subtitle,
     required this.isSelected,
     required this.onTap,
   });
@@ -180,27 +346,48 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          gradient: isSelected ? DesignGradients.primaryGradient : null,
+          color: isSelected ? null : Colors.white,
+          borderRadius: BorderRadius.circular(DesignRadius.xl),
           border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
+            color: isSelected ? Colors.transparent : DesignColors.secondary,
+            width: 2,
           ),
-          boxShadow: isSelected
-              ? [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 8)]
-              : [],
+          boxShadow: isSelected ? DesignShadows.glow : DesignShadows.small,
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? Colors.white : Colors.grey),
-            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white.withOpacity(0.2) : DesignColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(DesignRadius.m),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : DesignColors.primaryDark,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 12),
             Text(
               label,
               style: GoogleFonts.outfit(
-                color: isSelected ? Colors.white : Colors.black,
+                color: isSelected ? Colors.white : DesignColors.textPrimary,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: GoogleFonts.outfit(
+                color: isSelected ? Colors.white70 : DesignColors.textSecondary,
+                fontSize: 12,
               ),
             ),
           ],

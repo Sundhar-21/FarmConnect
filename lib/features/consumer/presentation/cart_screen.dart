@@ -316,7 +316,6 @@ class CartScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 100),
         ],
       ),
     );

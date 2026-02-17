@@ -22,7 +22,7 @@ class _ConsumerMainScreenState extends ConsumerState<ConsumerMainScreen> {
 
   final List<Widget> _screens = [
     const ConsumerHomeScreen(),
-    const SearchScreen(), // Markets
+    const SearchScreen(),
     const FavoritesScreen(),
     const CartScreen(),
     const ProfileScreen(),
@@ -42,44 +42,12 @@ class _ConsumerMainScreenState extends ConsumerState<ConsumerMainScreen> {
         extendBody: true,
         body: _screens[currentIndex],
         bottomNavigationBar: SafeArea(
+          top: false,
           child: Padding(
-            padding: const EdgeInsets.only(left: 12, bottom: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: CustomBottomNav(
-                    currentIndex: currentIndex,
-                    onTap: (index) => ref.read(navigationIndexProvider.notifier).state = index,
-                  ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(32.5),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Navigate to Search or open search sheet
-                        ref.read(navigationIndexProvider.notifier).state = 1; // For now switch to Markets/Search tab
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12, left: 4),
-                        width: 65,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2E2E2E).withOpacity(0.8), // Match pill color
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.1),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: const Icon(Icons.search_rounded, color: Colors.white, size: 30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: CustomBottomNav(
+              currentIndex: currentIndex,
+              onTap: (index) => ref.read(navigationIndexProvider.notifier).state = index,
             ),
           ),
         ),

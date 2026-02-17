@@ -19,38 +19,44 @@ class CustomBottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartCount = ref.watch(cartProvider).length;
-    final favCount = ref.watch(favoritesProvider).length;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(35),
+      borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
         child: Container(
-          height: 70,
+          height: 65,
           decoration: BoxDecoration(
-            color: const Color(0xFF2E2E2E).withOpacity(0.8), // Glassy charcoal
-            borderRadius: BorderRadius.circular(35),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFF1B2E1D).withOpacity(0.92),
+                const Color(0xFF0F1A12).withOpacity(0.92),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.1),
-              width: 1.5,
+              color: Colors.white.withOpacity(0.12),
+              width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(0, Icons.home_filled, 'Home'),
+                _buildNavItem(0, Icons.home_rounded, 'Home'),
                 _buildNavItem(1, Icons.storefront_rounded, 'Markets'),
-                _buildNavItem(2, Icons.favorite_rounded, 'Favorites', badge: _buildDotBadge()),
-                _buildNavItem(3, Icons.shopping_basket_rounded, 'Cart', badge: _buildCountBadge(cartCount)),
+                _buildNavItem(2, Icons.favorite_rounded, 'Favorites'),
+                _buildNavItem(3, Icons.shopping_basket_rounded, 'Cart', badge: cartCount > 0 ? cartCount : null),
                 _buildNavItem(4, Icons.person_rounded, 'Profile'),
               ],
             ),
@@ -60,15 +66,17 @@ class CustomBottomNav extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label, {Widget? badge}) {
+  Widget _buildNavItem(int index, IconData icon, String label, {int? badge}) {
     final isSelected = currentIndex == index;
     return GestureDetector(
       onTap: () => onTap(index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(25),
+          color: isSelected ? DesignColors.primary.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -78,57 +86,46 @@ class CustomBottomNav extends ConsumerWidget {
               children: [
                 Icon(
                   icon,
-                  color: isSelected ? Colors.white : Colors.grey[400],
-                  size: 24,
+                  color: isSelected ? DesignColors.primaryLight : Colors.grey[500],
+                  size: 22,
                 ),
                 if (badge != null)
                   Positioned(
-                    top: -2,
-                    right: -2,
-                    child: badge,
+                    top: -6,
+                    right: -8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        gradient: DesignGradients.primaryGradient,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: DesignColors.primary.withOpacity(0.4),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                      child: Center(
+                        child: Text(
+                          badge > 9 ? '9+' : badge.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               label,
               style: GoogleFonts.outfit(
-                color: isSelected ? Colors.white : Colors.grey[400],
+                color: isSelected ? DesignColors.primaryLight : Colors.grey[500],
                 fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDotBadge() {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: const BoxDecoration(
-        color: Color(0xFFE57373), // Soft red dot
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildCountBadge(int count) {
-    if (count == 0) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: const Color(0xFF66BB6A), // Green badge matching image
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF2E2E2E), width: 1),
-      ),
-      constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-      child: Center(
-        child: Text(
-          count > 9 ? '9+' : count.toString(),
-          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
         ),
       ),
     );

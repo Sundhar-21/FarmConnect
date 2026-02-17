@@ -6,6 +6,7 @@ import 'package:farmconnect/features/farmer/presentation/add_product_screen.dart
 import 'package:farmconnect/features/farmer/presentation/orders_screen.dart';
 import 'package:farmconnect/features/farmer/presentation/my_products_screen.dart';
 import 'package:farmconnect/features/farmer/presentation/sales_stats_screen.dart';
+import 'package:farmconnect/shared/design_constants.dart';
 
 class FarmerHomeScreen extends ConsumerWidget {
   const FarmerHomeScreen({super.key});
@@ -16,81 +17,201 @@ class FarmerHomeScreen extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        // Maybe show an exit confirmation or just do nothing
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text("Farmer Dashboard", style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 22, color: const Color(0xFF111111))),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () {
-                ref.read(authNotifierProvider.notifier).signOut();
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            )
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Manage Your Farm",
-                style: GoogleFonts.outfit(fontSize: 30, fontWeight: FontWeight.bold, color: const Color(0xFF111111)),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF8FFF8),
+                Color(0xFFFFFFFF),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Good Morning!",
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              color: DesignColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Manage Your Farm",
+                            style: GoogleFonts.outfit(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: DesignColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          ref.read(authNotifierProvider.notifier).signOut();
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(DesignRadius.l),
+                            boxShadow: DesignShadows.small,
+                          ),
+                          child: const Icon(
+                            Icons.logout_rounded,
+                            color: DesignColors.error,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.9,
+                      children: [
+                        _DashboardCard(
+                          icon: Icons.add_box_rounded,
+                          label: "Add Product",
+                          subtitle: "List new item",
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF28D339), Color(0xFF1B9E26)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          iconColor: Colors.white,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AddProductScreen()),
+                            );
+                          },
+                        ),
+                        _DashboardCard(
+                          icon: Icons.inventory_2_rounded,
+                          label: "My Products",
+                          subtitle: "Manage inventory",
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF4AE056), Color(0xFF28D339)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          iconColor: Colors.white,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MyProductsScreen()),
+                            );
+                          },
+                        ),
+                        _DashboardCard(
+                          icon: Icons.receipt_long_rounded,
+                          label: "Orders",
+                          subtitle: "View orders",
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          iconColor: Colors.white,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const FarmerOrdersScreen()),
+                            );
+                          },
+                        ),
+                        _DashboardCard(
+                          icon: Icons.analytics_rounded,
+                          label: "Sales Stats",
+                          subtitle: "Track performance",
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          iconColor: Colors.white,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SalesStatsScreen()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: DesignGradients.darkGradient,
+                      borderRadius: BorderRadius.circular(DesignRadius.xl),
+                      boxShadow: DesignShadows.medium,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Quick Tip",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Add fresh photos to attract more customers!",
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(DesignRadius.m),
+                          ),
+                          child: const Icon(
+                            Icons.lightbulb_outline_rounded,
+                            color: Color(0xFF4AE056),
+                            size: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  children: [
-                    _DashboardCard(
-                      icon: Icons.add_box_outlined, 
-                      label: "Add Product", 
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AddProductScreen()),
-                        );
-                      }
-                    ),
-                    _DashboardCard(
-                      icon: Icons.inventory_2_outlined, 
-                      label: "My Products", 
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MyProductsScreen()),
-                        );
-                      }
-                    ),
-                    _DashboardCard(
-                      icon: Icons.list_alt_outlined, 
-                      label: "Orders", 
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const FarmerOrdersScreen()),
-                        );
-                      }
-                    ),
-                    _DashboardCard(
-                      icon: Icons.analytics_outlined, 
-                      label: "Sales Stats", 
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SalesStatsScreen()),
-                        );
-                      }
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -101,22 +222,73 @@ class FarmerHomeScreen extends ConsumerWidget {
 class _DashboardCard extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String subtitle;
+  final LinearGradient gradient;
+  final Color iconColor;
   final VoidCallback onTap;
 
-  const _DashboardCard({required this.icon, required this.label, required this.onTap});
+  const _DashboardCard({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.gradient,
+    required this.iconColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      child: Card(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48, color: Theme.of(context).primaryColor),
-            const SizedBox(height: 12),
-            Text(label, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15, color: const Color(0xFF111111))),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(DesignRadius.xl),
+          boxShadow: [
+            BoxShadow(
+              color: gradient.colors.first.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(DesignRadius.m),
+                ),
+                child: Icon(icon, color: iconColor, size: 28),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

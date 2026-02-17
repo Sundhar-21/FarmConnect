@@ -15,110 +15,128 @@ class FavoritesScreen extends ConsumerWidget {
     final favorites = ref.watch(favoritesProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(child: const SizedBox(height: DesignSpacing.m)),
-              // Toolbar
-              SliverToBoxAdapter(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF8FFF8),
+              Color(0xFFFFFFFF),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(DesignSpacing.m),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildToolIcon(Icons.menu_rounded),
-                      Text(
-                        'Favorites',
-                        style: GoogleFonts.outfit(
-                          color: DesignColors.textPrimary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'My Favorites',
+                            style: GoogleFonts.outfit(
+                              color: DesignColors.textPrimary,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${favorites.length} items saved',
+                            style: GoogleFonts.outfit(
+                              color: DesignColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
                     GestureDetector(
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CartScreen())),
-                      child: _buildToolIcon(Icons.shopping_cart_outlined),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(DesignRadius.l),
+                          boxShadow: DesignShadows.small,
+                        ),
+                        child: const Icon(Icons.shopping_cart_outlined, color: DesignColors.textPrimary),
+                      ),
                     ),
                   ],
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: DesignSpacing.xl)),
-
-              if (favorites.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.favorite_border_rounded,
-                          size: 80,
-                          color: DesignColors.textSecondary.withOpacity(0.2),
-                        ),
-                        const SizedBox(height: DesignSpacing.m),
-                        Text(
-                          'No favorites found',
-                          style: GoogleFonts.outfit(
-                            color: DesignColors.textSecondary,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: DesignSpacing.s),
-                        Text(
-                          'Start exploring to add items here',
-                          style: GoogleFonts.outfit(
-                            color: DesignColors.textSecondary.withOpacity(0.5),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.only(bottom: 120),
-                  sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: DesignSpacing.m,
-                      crossAxisSpacing: DesignSpacing.m,
-                      childAspectRatio: 0.75,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final product = favorites[index];
-                        return FarmProductCard(
-                          product: product,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailsScreen(product: product),
+              Expanded(
+                child: favorites.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: DesignColors.primary.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.favorite_border_rounded,
+                                size: 64,
+                                color: DesignColors.primary.withOpacity(0.3),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      childCount: favorites.length,
-                    ),
-                  ),
-                ),
+                            const SizedBox(height: DesignSpacing.l),
+                            Text(
+                              'No favorites yet',
+                              style: GoogleFonts.outfit(
+                                color: DesignColors.textPrimary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: DesignSpacing.s),
+                            Text(
+                              'Save your favorite farm products\nto find them easily later',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(
+                                color: DesignColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.m),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: DesignSpacing.m,
+                          crossAxisSpacing: DesignSpacing.m,
+                          childAspectRatio: 0.72,
+                        ),
+                        itemCount: favorites.length,
+                        itemBuilder: (context, index) {
+                          final product = favorites[index];
+                          return FarmProductCard(
+                            product: product,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailsScreen(product: product),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildToolIcon(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(DesignSpacing.s),
-      decoration: BoxDecoration(
-        color: DesignColors.surface,
-        shape: BoxShape.circle,
-        border: Border.all(color: DesignColors.secondary),
-      ),
-      child: Icon(icon, color: DesignColors.textPrimary),
     );
   }
 }

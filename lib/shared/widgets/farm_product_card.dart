@@ -39,8 +39,9 @@ class FarmProductCard extends ConsumerWidget {
         height: 320,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: DesignColors.primary,
+          gradient: DesignGradients.primaryGradient,
           borderRadius: BorderRadius.circular(DesignRadius.xl),
+          boxShadow: DesignShadows.large,
         ),
         child: Stack(
           children: [
@@ -176,16 +177,9 @@ class FarmProductCard extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(DesignRadius.l),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(DesignRadius.xl),
+          boxShadow: DesignShadows.small,
         ),
-        padding: const EdgeInsets.all(DesignSpacing.s),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -195,103 +189,139 @@ class FarmProductCard extends ConsumerWidget {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: DesignColors.surface,
-                      borderRadius: BorderRadius.circular(DesignRadius.m),
+                      color: DesignColors.surfaceVariant,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(DesignRadius.xl)),
                     ),
-                    padding: const EdgeInsets.all(DesignSpacing.s),
+                    padding: const EdgeInsets.all(DesignSpacing.m),
                     child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(DesignRadius.m),
+                      child: Hero(
+                        tag: 'product_small_${product['id']}',
                         child: CachedNetworkImage(
                           imageUrl: product['image_url'] ?? '',
                           fit: BoxFit.contain,
                           memCacheWidth: 300,
-                          errorWidget: (context, url, error) => const Icon(Icons.eco, color: DesignColors.primary),
-                          placeholder: (context, url) => Container(color: DesignColors.surface),
+                          errorWidget: (context, url, error) => Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: DesignColors.primary.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.eco, color: DesignColors.primary, size: 32),
+                          ),
+                          placeholder: (context, url) => Container(color: DesignColors.surfaceVariant),
                         ),
                       ),
                     ),
                   ),
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: 10,
+                    left: 10,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6B8E6B).withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(4),
+                        gradient: DesignGradients.primaryGradient,
+                        borderRadius: BorderRadius.circular(DesignRadius.full),
                       ),
                       child: Text(
-                        'ORGANIC',
-                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                        'Fresh',
+                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
                   Positioned(
                     top: 0,
                     right: 0,
-                    child: IconButton(
-                      icon: Icon(
-                        isFav ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                        color: isFav ? Colors.redAccent : DesignColors.textSecondary,
-                        size: 18,
+                    child: GestureDetector(
+                      onTap: () => ref.read(favoritesProvider.notifier).toggleFavorite(product),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: DesignShadows.small,
+                        ),
+                        child: Icon(
+                          isFav ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                          color: isFav ? Colors.redAccent : DesignColors.textSecondary,
+                          size: 18,
+                        ),
                       ),
-                      onPressed: () => ref.read(favoritesProvider.notifier).toggleFavorite(product),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: DesignSpacing.s),
-            Text(
-              product['name'] ?? 'Product',
-              style: GoogleFonts.outfit(
-                color: DesignColors.textPrimary,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              '${product['unit'] ?? '500g'} • \$${product['price'] ?? '0.00'} / ${product['unit'] ?? 'kg'}',
-              style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 10),
-            ),
-            const SizedBox(height: DesignSpacing.s),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '\$${product['price']}',
-                  style: GoogleFonts.outfit(
-                    color: DesignColors.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    ref.read(cartProvider.notifier).addToCart(product, 1);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("${product['name']} added to cart"),
-                        duration: const Duration(seconds: 1),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: DesignColors.primary,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: DesignColors.primary,
-                      borderRadius: BorderRadius.circular(8),
+            Padding(
+              padding: const EdgeInsets.all(DesignSpacing.m),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'] ?? 'Product',
+                    style: GoogleFonts.outfit(
+                      color: DesignColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: const Icon(Icons.add, color: Colors.white, size: 20),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                )
-              ],
-            )
+                  const SizedBox(height: 4),
+                  Text(
+                    '${product['unit'] ?? '500g'}',
+                    style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+                  ),
+                  const SizedBox(height: DesignSpacing.s),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '\$${product['price']}',
+                            style: GoogleFonts.outfit(
+                              color: DesignColors.primaryDark,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          ref.read(cartProvider.notifier).addToCart(product, 1);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("${product['name']} added to cart"),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: DesignColors.primaryDark,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: DesignGradients.primaryGradient,
+                            borderRadius: BorderRadius.circular(DesignRadius.m),
+                            boxShadow: [
+                              BoxShadow(
+                                color: DesignColors.primary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white, size: 18),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
           ],
         ),
       ),

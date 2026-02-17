@@ -20,34 +20,30 @@ class CategoryChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: DesignSpacing.m),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(
           horizontal: DesignSpacing.l,
-          vertical: DesignSpacing.s,
+          vertical: DesignSpacing.s + 2,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? DesignColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(DesignRadius.xl),
+          gradient: isSelected ? DesignGradients.primaryGradient : null,
+          color: isSelected ? null : Colors.white,
+          borderRadius: BorderRadius.circular(DesignRadius.xxl),
           border: Border.all(
-            color: isSelected ? DesignColors.primary : DesignColors.secondary,
-            width: 1,
+            color: isSelected ? Colors.transparent : DesignColors.secondary,
+            width: 1.5,
           ),
-          boxShadow: isSelected ? [] : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: isSelected ? DesignShadows.glow : DesignShadows.small,
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
               Icon(
                 icon,
                 size: 18,
-                color: isSelected ? Colors.white : DesignColors.primary,
+                color: isSelected ? Colors.white : DesignColors.primaryDark,
               ),
               const SizedBox(width: DesignSpacing.s),
             ],
@@ -55,7 +51,7 @@ class CategoryChip extends StatelessWidget {
               label,
               style: GoogleFonts.outfit(
                 color: isSelected ? Colors.white : DesignColors.textPrimary,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 fontSize: 14,
               ),
             ),

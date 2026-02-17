@@ -23,166 +23,159 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: Navigator.canPop(context) ? IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: DesignColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ) : null,
-        title: Text('Local Markets', style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: DesignColors.textPrimary),
-            onPressed: () {},
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF8FFF8),
+              Color(0xFFFFFFFF),
+            ],
           ),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_basket_outlined, color: DesignColors.textPrimary),
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CartScreen())),
-                  ),
-                  if (ref.watch(cartProvider).isNotEmpty)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: DesignColors.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: Text(
-                          '${ref.watch(cartProvider).length}',
-                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-          const SizedBox(width: DesignSpacing.s),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(productsProvider);
-          await Future.delayed(const Duration(milliseconds: 500));
-        },
-        color: DesignColors.primary,
-        child: ListView(
-          children: [
-            // Categories
-            const SizedBox(height: DesignSpacing.m),
-            SizedBox(
-              height: 50,
-              child: ref.watch(categoriesProvider).when(
-                data: (categories) {
-                  final allCategories = ['All Items', ...categories.map((c) => c['name'] as String)];
-                  return ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
-                    children: allCategories.map((cat) => Padding(
-                      padding: const EdgeInsets.only(right: DesignSpacing.s),
-                      child: CategoryChip(
-                        label: cat,
-                        isSelected: _selectedCategory == cat,
-                        onTap: () => setState(() => _selectedCategory = cat),
-                      ),
-                    )).toList(),
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, stack) => const SizedBox(),
-              ),
-            ),
-            const SizedBox(height: DesignSpacing.l),
-
-            // Product Grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
-              child: ref.watch(productsProvider).when(
-                data: (products) {
-                  final filteredProducts = products.where((p) {
-                    if (_selectedCategory == 'All Items') return true;
-                    return p['categories']?['name'] == _selectedCategory;
-                  }).toList();
-
-                  if (filteredProducts.isEmpty) {
-                    return const Center(child: Padding(
-                      padding: EdgeInsets.all(DesignSpacing.xl),
-                      child: Text('No results found'),
-                    ));
-                  }
-
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: filteredProducts.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: DesignSpacing.m,
-                      mainAxisSpacing: DesignSpacing.m,
-                    ),
-                    itemBuilder: (context, index) {
-                      final product = filteredProducts[index];
-                      return FarmProductCard(
-                        product: product,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProductDetailsScreen(product: product),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(DesignSpacing.m),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Local Markets',
+                            style: GoogleFonts.outfit(
+                              color: DesignColors.textPrimary,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Find fresh produce near you',
+                            style: GoogleFonts.outfit(
+                              color: DesignColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CartScreen())),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(DesignRadius.l),
+                          boxShadow: DesignShadows.small,
+                        ),
+                        child: Stack(
+                          children: [
+                            const Icon(Icons.shopping_basket_outlined, color: DesignColors.textPrimary),
+                            if (ref.watch(cartProvider).isNotEmpty)
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    gradient: DesignGradients.primaryGradient,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    '${ref.watch(cartProvider).length}',
+                                    style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: ref.watch(categoriesProvider).when(
+                  data: (categories) {
+                    final allCategories = ['All Items', ...categories.map((c) => c['name'] as String)];
+                    return ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.m),
+                      children: allCategories.map((cat) => Padding(
+                        padding: const EdgeInsets.only(right: DesignSpacing.s),
+                        child: CategoryChip(
+                          label: cat,
+                          isSelected: _selectedCategory == cat,
+                          onTap: () => setState(() => _selectedCategory = cat),
+                        ),
+                      )).toList(),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, stack) => const SizedBox(),
+                ),
+              ),
+              const SizedBox(height: DesignSpacing.m),
+              Expanded(
+                child: ref.watch(productsProvider).when(
+                  data: (products) {
+                    final filteredProducts = products.where((p) {
+                      if (_selectedCategory == 'All Items') return true;
+                      return p['categories']?['name'] == _selectedCategory;
+                    }).toList();
+
+                    if (filteredProducts.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off_rounded, size: 64, color: DesignColors.textSecondary.withOpacity(0.3)),
+                            const SizedBox(height: DesignSpacing.m),
+                            Text(
+                              'No products found',
+                              style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
-              ),
-            ),
+                    }
 
-            // Looking for more banner
-            Container(
-              margin: const EdgeInsets.all(DesignSpacing.l),
-              padding: const EdgeInsets.all(DesignSpacing.xl),
-              decoration: BoxDecoration(
-                color: DesignColors.primary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(DesignRadius.xl),
-                border: Border.all(color: DesignColors.primary.withOpacity(0.1)),
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.m),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.72,
+                        crossAxisSpacing: DesignSpacing.m,
+                        mainAxisSpacing: DesignSpacing.m,
+                      ),
+                      itemCount: filteredProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = filteredProducts[index];
+                        return FarmProductCard(
+                          product: product,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetailsScreen(product: product),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator(color: DesignColors.primary)),
+                  error: (e, _) => Center(child: Text('Error: $e')),
+                ),
               ),
-              child: Column(
-                children: [
-                  const Icon(Icons.eco_rounded, color: DesignColors.primary, size: 40),
-                  const SizedBox(height: DesignSpacing.m),
-                  Text(
-                    'Looking for more?',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  const SizedBox(height: DesignSpacing.s),
-                  Text(
-                    'Discover what\'s in season right now at your local farms.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(color: DesignColors.textSecondary),
-                  ),
-                  const SizedBox(height: DesignSpacing.l),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: DesignColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignRadius.xl)),
-                    ),
-                    child: const Text('Browse Market'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
