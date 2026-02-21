@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/shared/design_constants.dart';
 import 'package:farmconnect/shared/widgets/farm_product_card.dart';
 import 'package:farmconnect/shared/widgets/category_chip.dart';
-import 'package:farmconnect/core/services/supabase_service.dart';
 import 'package:farmconnect/features/consumer/presentation/cart_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/product_details_screen.dart';
 import 'package:farmconnect/features/consumer/data/product_provider.dart';

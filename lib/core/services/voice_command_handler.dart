@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/core/services/voice_service.dart';
 import 'package:farmconnect/features/consumer/data/navigation_provider.dart';
@@ -12,39 +11,44 @@ class VoiceCommandHandler {
   VoiceCommandHandler(this.ref, this.voiceService);
 
   Future<void> handleCommand(String command) async {
-    final lowerCommand = command.toLowerCase();
+    final lowerCommand = command.toLowerCase().trim();
     
-    if (_matchCommand(lowerCommand, ['go to home', 'open home', 'show home', 'home'])) {
+    if (lowerCommand.isEmpty) {
+      await voiceService.speak('I did not hear anything. Please try again.');
+      return;
+    }
+
+    if (_matchCommand(lowerCommand, ['go to home', 'open home', 'show home', 'home page', 'home', 'go home'])) {
       ref.read(navigationIndexProvider.notifier).state = 0;
-      await voiceService.speak('Opening home screen');
+      await voiceService.speak('Opening home');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['go to search', 'open search', 'search', 'find'])) {
+    if (_matchCommand(lowerCommand, ['go to search', 'open search', 'search', 'find', 'go to markets', 'markets', 'go to market', 'open market'])) {
       ref.read(navigationIndexProvider.notifier).state = 1;
-      await voiceService.speak('Opening search. What would you like to find?');
+      await voiceService.speak('Opening search');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['go to favorites', 'open favorites', 'my favorites', 'favourites', 'favorites'])) {
+    if (_matchCommand(lowerCommand, ['go to favorites', 'open favorites', 'my favorites', 'favourites', 'favorites', 'favourite', 'favorite'])) {
       ref.read(navigationIndexProvider.notifier).state = 2;
       await voiceService.speak('Opening favorites');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['go to cart', 'open cart', 'my cart', 'shopping cart', 'basket'])) {
+    if (_matchCommand(lowerCommand, ['go to cart', 'open cart', 'my cart', 'shopping cart', 'basket', 'go to basket', 'cart', 'open basket'])) {
       ref.read(navigationIndexProvider.notifier).state = 3;
       await voiceService.speak('Opening cart');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['go to profile', 'open profile', 'my account', 'account', 'profile'])) {
+    if (_matchCommand(lowerCommand, ['go to profile', 'open profile', 'my account', 'account', 'profile', 'my profile', 'open account'])) {
       ref.read(navigationIndexProvider.notifier).state = 4;
       await voiceService.speak('Opening profile');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['search for', 'find', 'look for', 'show me'])) {
+    if (_matchCommand(lowerCommand, ['search for', 'find', 'look for', 'show me', 'search'])) {
       final searchTerm = _extractSearchTerm(lowerCommand);
       if (searchTerm.isNotEmpty) {
         await _searchAndAddToCart(searchTerm);
@@ -60,32 +64,32 @@ class VoiceCommandHandler {
       }
     }
 
-    if (_matchCommand(lowerCommand, ['clear cart', 'empty cart', 'remove all'])) {
+    if (_matchCommand(lowerCommand, ['clear cart', 'empty cart', 'remove all', 'delete cart', 'clear'])) {
       ref.read(cartProvider.notifier).clearCart();
       await voiceService.speak('Cart cleared');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['how much', 'total', 'price', 'cost'])) {
+    if (_matchCommand(lowerCommand, ['how much', 'total', 'price', 'cost', 'bill', 'amount', 'check total'])) {
       final cart = ref.read(cartProvider);
       final total = cart.fold(0.0, (sum, item) => sum + (item.product['price'] * item.quantity));
-      await voiceService.speak('Your total is ${total.toStringAsFixed(2)} rupees');
+      await voiceService.speak('Your total is ${total.toStringAsFixed(0)} rupees');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['how many items', 'items in cart', 'cart items'])) {
+    if (_matchCommand(lowerCommand, ['how many items', 'items in cart', 'cart items', 'number of items', 'items', 'how many'])) {
       final cart = ref.read(cartProvider);
       final count = cart.fold(0, (sum, item) => sum + item.quantity);
-      await voiceService.speak('You have $count items in your cart');
+      await voiceService.speak('You have $count items in cart');
       return;
     }
 
-    if (_matchCommand(lowerCommand, ['help', 'commands', 'what can you do'])) {
-      await voiceService.speak('I can help you navigate to home, search, favorites, cart, or profile. I can also search for products and add them to your cart. Just say hey nova followed by your command.');
+    if (_matchCommand(lowerCommand, ['help', 'commands', 'what can you do', 'help me', 'assist', 'list commands'])) {
+      await voiceService.speak('Say home to go to home screen. Say search to open search. Say favorites to see your favorites. Say cart to view your cart. Say profile to open your profile.');
       return;
     }
 
-    await voiceService.speak('Sorry, I did not understand that command. Say hey nova and then tell me what you want to do.');
+    await voiceService.speak('Sorry, I did not understand. Say help for available commands.');
   }
 
   bool _matchCommand(String command, List<String> patterns) {
@@ -93,7 +97,7 @@ class VoiceCommandHandler {
   }
 
   String _extractSearchTerm(String command) {
-    final patterns = ['search for ', 'find ', 'look for ', 'show me '];
+    final patterns = ['search for ', 'find ', 'look for ', 'show me ', 'search '];
     for (final pattern in patterns) {
       if (command.contains(pattern)) {
         return command.split(pattern).last.trim();
@@ -125,7 +129,7 @@ class VoiceCommandHandler {
       if (matchingProducts.isNotEmpty) {
         final product = matchingProducts.first;
         ref.read(cartProvider.notifier).addToCart(product, 1);
-        voiceService.speak('Found ${matchingProducts.length} products for $searchTerm. Added ${product['name']} to your cart');
+        voiceService.speak('Found ${matchingProducts.length} products. Added ${product['name']} to cart');
       } else {
         voiceService.speak('No products found for $searchTerm');
       }
@@ -143,7 +147,7 @@ class VoiceCommandHandler {
       if (matchingProducts.isNotEmpty) {
         final product = matchingProducts.first;
         ref.read(cartProvider.notifier).addToCart(product, 1);
-        voiceService.speak('Added ${product['name']} to your cart');
+        voiceService.speak('Added ${product['name']} to cart');
       } else {
         voiceService.speak('Product $productName not found');
       }

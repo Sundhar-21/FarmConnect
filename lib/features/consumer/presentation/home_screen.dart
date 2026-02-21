@@ -27,7 +27,21 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final newQuery = _searchController.text.toLowerCase();
+    if (newQuery != _searchQuery) {
+      setState(() => _searchQuery = newQuery);
+    }
+  }
+
+  @override
   void dispose() {
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -54,7 +68,6 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
           HapticFeedback.mediumImpact();
           ref.invalidate(productsProvider);
           ref.invalidate(categoriesProvider);
-          await Future.delayed(const Duration(milliseconds: 500));
         },
         color: DesignColors.primary,
         backgroundColor: Colors.white,
@@ -62,6 +75,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
         edgeOffset: 50,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
+          cacheExtent: 500,
           slivers: [
             SliverToBoxAdapter(child: SizedBox(height: MediaQuery.of(context).padding.top + 10)),
             

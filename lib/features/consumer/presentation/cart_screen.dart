@@ -37,21 +37,23 @@ class CartScreen extends ConsumerWidget {
       ),
       body: cartItems.isEmpty
           ? _buildEmptyState()
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l, vertical: DesignSpacing.m),
-                  child: Row(
-                    children: [
-                      Text(
-                        '${cartItems.length} items from 2 local farms',
-                        style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16),
-                      ),
-                    ],
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l, vertical: DesignSpacing.m),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${cartItems.length} items from 2 local farms',
+                          style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: cartItems.length,
                     padding: const EdgeInsets.symmetric(horizontal: DesignSpacing.l),
                     itemBuilder: (context, index) {
@@ -59,10 +61,11 @@ class CartScreen extends ConsumerWidget {
                       return _buildCartItem(context, ref, item);
                     },
                   ),
-                ),
-                _buildCarbonFootprint(),
-                _buildCheckoutPanel(context, ref, totalPrice, profileAsync.value?['address'] ?? 'No Address Provided'),
-              ],
+                  _buildCarbonFootprint(),
+                  _buildCheckoutPanel(context, ref, totalPrice, profileAsync.value?['address'] ?? 'No Address Provided'),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 80),
+                ],
+              ),
             ),
     );
   }

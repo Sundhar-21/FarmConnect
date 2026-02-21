@@ -197,7 +197,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: DesignSpacing.xxl),
+                      SizedBox(height: MediaQuery.of(context).padding.bottom + 100),
                     ],
                   ),
                 ),

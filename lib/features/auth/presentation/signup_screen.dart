@@ -4,6 +4,8 @@ import 'package:farmconnect/features/auth/data/auth_provider.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/shared/design_constants.dart';
+import 'package:farmconnect/features/consumer/presentation/main_screen.dart';
+import 'package:farmconnect/features/farmer/presentation/home_screen.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -207,11 +209,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                      } catch (e) {
                                        debugPrint("Error creating sub-profile: $e");
                                      }
+                                     
+                                     if (mounted) {
+                                       if (_selectedRole == 'farmer') {
+                                         Navigator.pushAndRemoveUntil(
+                                           context,
+                                           MaterialPageRoute(builder: (context) => const FarmerHomeScreen()),
+                                           (route) => false,
+                                         );
+                                       } else {
+                                         Navigator.pushAndRemoveUntil(
+                                           context,
+                                           MaterialPageRoute(builder: (context) => const ConsumerMainScreen()),
+                                           (route) => false,
+                                         );
+                                       }
+                                     }
                                    }
-
-                                   ScaffoldMessenger.of(context).showSnackBar(
-                                     const SnackBar(content: Text('Account created! Logging you in...')),
-                                   );
                                 }
                               } catch (e) {
                                  ScaffoldMessenger.of(context).showSnackBar(

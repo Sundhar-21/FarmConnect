@@ -7,7 +7,6 @@ import 'package:farmconnect/core/services/supabase_service.dart';
 import 'package:farmconnect/core/l10n/app_localizations.dart';
 import 'package:farmconnect/features/auth/presentation/login_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/main_screen.dart';
-import 'package:farmconnect/features/auth/data/auth_provider.dart';
 import 'package:farmconnect/features/auth/data/language_provider.dart';
 import 'package:farmconnect/features/farmer/presentation/home_screen.dart';
 import 'package:farmconnect/features/auth/data/profile_provider.dart';

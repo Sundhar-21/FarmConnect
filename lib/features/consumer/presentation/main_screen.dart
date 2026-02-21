@@ -1,11 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/features/consumer/presentation/home_screen.dart';
 import 'package:farmconnect/features/auth/presentation/profile_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/favorites_screen.dart';
 import 'package:farmconnect/features/consumer/presentation/search_screen.dart';
-import 'package:farmconnect/features/consumer/presentation/orders_screen.dart';
 import 'package:farmconnect/shared/widgets/custom_bottom_nav.dart';
 import 'package:farmconnect/features/consumer/data/navigation_provider.dart';
 import 'package:farmconnect/shared/widgets/voice_button.dart';
@@ -21,12 +19,12 @@ class ConsumerMainScreen extends ConsumerStatefulWidget {
 
 class _ConsumerMainScreenState extends ConsumerState<ConsumerMainScreen> {
 
-  final List<Widget> _screens = [
-    const ConsumerHomeScreen(),
-    const SearchScreen(),
-    const FavoritesScreen(),
-    const CartScreen(),
-    const ProfileScreen(),
+  final List<Widget> _screens = const [
+    ConsumerHomeScreen(),
+    SearchScreen(),
+    FavoritesScreen(),
+    CartScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -43,7 +41,10 @@ class _ConsumerMainScreenState extends ConsumerState<ConsumerMainScreen> {
         extendBody: true,
         body: Stack(
           children: [
-            _screens[currentIndex],
+            IndexedStack(
+              index: currentIndex,
+              children: _screens,
+            ),
             Positioned(
               right: 16,
               bottom: 80,

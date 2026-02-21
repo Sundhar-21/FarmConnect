@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
 
-final productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final productsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final supabase = ref.watch(supabaseProvider);
   final response = await supabase
       .from('products')
@@ -11,7 +11,7 @@ final productsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async 
   return List<Map<String, dynamic>>.from(response);
 });
 
-final categoriesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final categoriesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final supabase = ref.watch(supabaseProvider);
   final response = await supabase
       .from('categories')

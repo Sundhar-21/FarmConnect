@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/core/services/voice_service.dart';
@@ -13,69 +12,89 @@ class VoiceButton extends ConsumerStatefulWidget {
 
 class _VoiceButtonState extends ConsumerState<VoiceButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+  late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  bool _isProcessing = false;
+  bool _initialized = false;
+  bool _isInitializing = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(_controller);
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initVoiceService();
+      _initService();
     });
   }
 
-  Future<void> _initVoiceService() async {
+  Future<void> _initService() async {
+    if (_initialized || _isInitializing) return;
+    _isInitializing = true;
+    
+    debugPrint('Initializing voice service...');
     final voiceService = ref.read(voiceServiceProvider.notifier);
     final handler = ref.read(voiceCommandHandlerProvider);
-    voiceService.setCommandHandler((command) {
-      handler.handleCommand(command);
+    
+    voiceService.setCommandHandler((cmd) {
+      debugPrint('Command received: $cmd');
+      handler.handleCommand(cmd);
     });
-    await voiceService.initialize();
+    
+    final success = await voiceService.initialize();
+    debugPrint('Voice service initialized: $success');
+    _initialized = true;
+    _isInitializing = false;
+    
+    if (success) {
+      await voiceService.speak('Voice assistant ready');
+    }
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  void _startListening() async {
-    if (_isProcessing) return;
-    
-    final voiceState = ref.read(voiceServiceProvider);
+  void _toggleListening() async {
     final voiceService = ref.read(voiceServiceProvider.notifier);
-
-    if (voiceState.state == VoiceState.listening) {
-      _isProcessing = true;
+    final currentState = ref.read(voiceServiceProvider).state;
+    
+    debugPrint('Current voice state: $currentState');
+    
+    if (currentState == VoiceState.listening) {
+      _controller.stop();
+      _controller.reset();
       await voiceService.stopListening();
-      _animationController.stop();
-      _animationController.reset();
-      _isProcessing = false;
-    } else {
-      _isProcessing = true;
-      _animationController.repeat(reverse: true);
+    } else if (currentState == VoiceState.idle || currentState == VoiceState.error) {
+      _controller.repeat(reverse: true);
       await voiceService.startListening();
-      _isProcessing = false;
+    } else if (currentState == VoiceState.speaking) {
+      await voiceService.stopSpeaking();
+      _controller.repeat(reverse: true);
+      await voiceService.startListening();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final voiceState = ref.watch(voiceServiceProvider);
+    final isListening = voiceState.state == VoiceState.listening;
 
-    ref.listen<VoiceServiceState>(voiceServiceProvider, (previous, next) {
-      if (next.state == VoiceState.idle && _animationController.isAnimating) {
-        _animationController.stop();
-        _animationController.reset();
+    ref.listen<VoiceServiceState>(voiceServiceProvider, (prev, next) {
+      debugPrint('Voice state changed: ${prev?.state} -> ${next.state}');
+      
+      if (next.state == VoiceState.idle && _controller.isAnimating) {
+        _controller.stop();
+        _controller.reset();
+      }
+      
+      if (next.state == VoiceState.speaking && prev?.state != VoiceState.speaking) {
+        debugPrint('Speaking: ${next.lastResult}');
       }
     });
 
@@ -83,52 +102,40 @@ class _VoiceButtonState extends ConsumerState<VoiceButton>
       animation: _scaleAnimation,
       builder: (context, child) {
         return Transform.scale(
-          scale: voiceState.state == VoiceState.listening
-              ? _scaleAnimation.value
-              : 1.0,
+          scale: isListening ? _scaleAnimation.value : 1.0,
           child: child,
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: voiceState.state == VoiceState.listening
-              ? const LinearGradient(
-                  colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : const LinearGradient(
-                  colors: [Color(0xFF28D339), Color(0xFF1BAF26)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: (voiceState.state == VoiceState.listening
-                      ? const Color(0xFFFF6B6B)
-                      : const Color(0xFF28D339))
-                  .withOpacity(0.4),
-              blurRadius: 12,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: _startListening,
-            customBorder: const CircleBorder(),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              child: Icon(
-                voiceState.state == VoiceState.listening
-                    ? Icons.mic
-                    : Icons.mic_none,
-                color: Colors.white,
-                size: 28,
+      child: GestureDetector(
+        onTap: _toggleListening,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: isListening
+                ? const LinearGradient(
+                    colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : const LinearGradient(
+                    colors: [Color(0xFF28D339), Color(0xFF1BAF26)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: (isListening ? const Color(0xFFFF6B6B) : const Color(0xFF28D339))
+                    .withOpacity(0.5),
+                blurRadius: 15,
+                spreadRadius: 2,
               ),
-            ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Icon(
+            isListening ? Icons.mic : Icons.mic_none,
+            color: Colors.white,
+            size: 28,
           ),
         ),
       ),
