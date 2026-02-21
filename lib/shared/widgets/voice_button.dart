@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/core/services/voice_service.dart';
 import 'package:farmconnect/core/services/voice_command_handler.dart';
+import 'package:farmconnect/core/services/voice_language_provider.dart';
+import 'package:farmconnect/shared/design_constants.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class VoiceButton extends ConsumerStatefulWidget {
   const VoiceButton({super.key});
@@ -16,6 +20,7 @@ class _VoiceButtonState extends ConsumerState<VoiceButton>
   late Animation<double> _scaleAnimation;
   bool _initialized = false;
   bool _isInitializing = false;
+  VoiceLanguage _currentLanguage = supportedVoiceLanguages.first;
 
   @override
   void initState() {
@@ -41,7 +46,7 @@ class _VoiceButtonState extends ConsumerState<VoiceButton>
     
     voiceService.setCommandHandler((cmd) {
       debugPrint('Command received: $cmd');
-      handler.handleCommand(cmd);
+      handler.handleCommand(cmd, languageCode: _currentLanguage.code);
     });
     
     final success = await voiceService.initialize();
@@ -80,6 +85,160 @@ class _VoiceButtonState extends ConsumerState<VoiceButton>
     }
   }
 
+  void _showLanguageSelector() {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(DesignRadius.xxl)),
+        ),
+        padding: const EdgeInsets.all(DesignSpacing.l),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: DesignColors.secondary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: DesignSpacing.m),
+            Text(
+              'Select Voice Language',
+              style: GoogleFonts.outfit(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: DesignColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: DesignSpacing.s),
+            Text(
+              'Choose your preferred language for voice commands',
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                color: DesignColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: DesignSpacing.l),
+            ...supportedVoiceLanguages.map((lang) => _buildLanguageOption(lang)),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(VoiceLanguage lang) {
+    final isSelected = _currentLanguage.code == lang.code;
+    return GestureDetector(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        setState(() {
+          _currentLanguage = lang;
+        });
+        
+        final voiceService = ref.read(voiceServiceProvider.notifier);
+        await voiceService.setLanguage(lang);
+        
+        if (mounted) {
+          Navigator.pop(context);
+          await voiceService.speak('Language set to ${lang.name}');
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? DesignColors.primary.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(DesignRadius.l),
+          border: Border.all(
+            color: isSelected ? DesignColors.primary : DesignColors.secondary,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isSelected ? DesignColors.primary : DesignColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(DesignRadius.m),
+              ),
+              child: Center(
+                child: Text(
+                  _getLanguageEmoji(lang.code),
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    lang.name,
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? DesignColors.primary : DesignColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    lang.nativeName,
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: DesignColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: DesignColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getLanguageEmoji(String code) {
+    switch (code) {
+      case 'en':
+        return '🇬🇧';
+      case 'ta':
+        return '🇮🇳';
+      case 'hi':
+        return '🇮🇳';
+      case 'te':
+        return '🇮🇳';
+      case 'kn':
+        return '🇮🇳';
+      case 'ml':
+        return '🇮🇳';
+      case 'th':
+        return '🌐';
+      default:
+        return '🌐';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final voiceState = ref.watch(voiceServiceProvider);
@@ -98,47 +257,55 @@ class _VoiceButtonState extends ConsumerState<VoiceButton>
       }
     });
 
-    return AnimatedBuilder(
-      animation: _scaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: isListening ? _scaleAnimation.value : 1.0,
-          child: child,
-        );
-      },
-      child: GestureDetector(
-        onTap: _toggleListening,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: isListening
-                ? const LinearGradient(
-                    colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : const LinearGradient(
-                    colors: [Color(0xFF28D339), Color(0xFF1BAF26)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: (isListening ? const Color(0xFFFF6B6B) : const Color(0xFF28D339))
-                    .withOpacity(0.5),
-                blurRadius: 15,
-                spreadRadius: 2,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onLongPress: _showLanguageSelector,
+          child: AnimatedBuilder(
+            animation: _scaleAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: isListening ? _scaleAnimation.value : 1.0,
+                child: child,
+              );
+            },
+            child: GestureDetector(
+              onTap: _toggleListening,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: isListening
+                      ? const LinearGradient(
+                          colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : const LinearGradient(
+                          colors: [Color(0xFF28D339), Color(0xFF1BAF26)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isListening ? const Color(0xFFFF6B6B) : const Color(0xFF28D339))
+                          .withOpacity(0.5),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Icon(
+                  isListening ? Icons.mic : Icons.mic_none,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
-            ],
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Icon(
-            isListening ? Icons.mic : Icons.mic_none,
-            color: Colors.white,
-            size: 28,
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

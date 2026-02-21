@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:farmconnect/core/services/voice_language_provider.dart';
 
 enum VoiceState {
   idle,
@@ -16,12 +17,14 @@ class VoiceServiceState {
   final String lastCommand;
   final String lastResult;
   final bool isEnabled;
+  final String currentLanguage;
 
   const VoiceServiceState({
     this.state = VoiceState.idle,
     this.lastCommand = '',
     this.lastResult = '',
     this.isEnabled = false,
+    this.currentLanguage = 'en',
   });
 
   VoiceServiceState copyWith({
@@ -29,12 +32,14 @@ class VoiceServiceState {
     String? lastCommand,
     String? lastResult,
     bool? isEnabled,
+    String? currentLanguage,
   }) {
     return VoiceServiceState(
       state: state ?? this.state,
       lastCommand: lastCommand ?? this.lastCommand,
       lastResult: lastResult ?? this.lastResult,
       isEnabled: isEnabled ?? this.isEnabled,
+      currentLanguage: currentLanguage ?? this.currentLanguage,
     );
   }
 }
@@ -46,6 +51,8 @@ class VoiceService extends StateNotifier<VoiceServiceState> {
   bool _speechEnabled = false;
   bool _isInitialized = false;
   Future<void>? _initFuture;
+  VoiceLanguage _currentLanguage = supportedVoiceLanguages.first;
+  List<stt.LocaleName> _availableLocales = [];
 
   VoiceService() : super(const VoiceServiceState()) {
     _initServices();
@@ -130,6 +137,24 @@ class VoiceService extends StateNotifier<VoiceServiceState> {
     _onCommand = handler;
   }
 
+  Future<void> setLanguage(VoiceLanguage language) async {
+    _currentLanguage = language;
+    await _tts.setLanguage(language.ttsCode);
+    await _tts.setSpeechRate(0.5);
+    await _tts.setVolume(1.0);
+    await _tts.setPitch(1.1);
+    state = state.copyWith(currentLanguage: language.code);
+  }
+
+  VoiceLanguage get currentLanguage => _currentLanguage;
+
+  Future<List<stt.LocaleName>> getAvailableLocales() async {
+    if (_availableLocales.isEmpty) {
+      _availableLocales = await _speech.locales();
+    }
+    return _availableLocales;
+  }
+
   Future<bool> initialize() async {
     await _initSpeech();
     return _speechEnabled;
@@ -184,7 +209,7 @@ class VoiceService extends StateNotifier<VoiceServiceState> {
       },
       listenFor: const Duration(seconds: 15),
       pauseFor: const Duration(seconds: 4),
-      localeId: 'en_US',
+      localeId: _currentLanguage.sttCode,
       partialResults: true,
       cancelOnError: false,
       listenMode: stt.ListenMode.dictation,
