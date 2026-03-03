@@ -87,12 +87,15 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: widget.product['image_url'] ?? '',
-                    fit: BoxFit.cover,
-                    memCacheWidth: 800,
-                    placeholder: (context, url) => Container(color: DesignColors.surface),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  GestureDetector(
+                    onTap: () => _showImageZoom(context, widget.product['image_url'] ?? ''),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.product['image_url'] ?? '',
+                      fit: BoxFit.cover,
+                      memCacheWidth: 800,
+                      placeholder: (context, url) => Container(color: DesignColors.surface),
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                    ),
                   ),
                   Positioned(
                     bottom: 20,
@@ -109,7 +112,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                           const SizedBox(width: 4),
                           Text(
                             'HARVESTED 4 HOURS AGO',
-                            style: GoogleFonts.outfit(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -130,27 +133,27 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                     Expanded(
                       child: Text(
                         widget.product['name'] ?? 'Product Name',
-                        style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: DesignColors.textPrimary),
+                        style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: DesignColors.textPrimary),
                       ),
                     ),
                     Row(
                       children: [
                         const Icon(Icons.star, color: DesignColors.primary, size: 24),
                         const SizedBox(width: 4),
-                        Text('4.9', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: DesignColors.primary)),
+                        Text('4.9', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: DesignColors.primary)),
                       ],
                     ),
                   ],
                 ),
                 Text(
                   'Naturally sun-ripened, non-GMO',
-                  style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16),
+                  style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 16),
                 ),
                 const SizedBox(height: DesignSpacing.xl),
                 
                 Text(
                     'SELECT WEIGHT',
-                    style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: DesignSpacing.m),
                 Row(
@@ -187,18 +190,18 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Sunny Oaks Farm', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text('Sunny Oaks Farm', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
                             Row(
                               children: [
                                 const Icon(Icons.location_on, size: 14, color: DesignColors.textSecondary),
                                 const SizedBox(width: 4),
-                                Text('Napa Valley, California', style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12)),
+                                Text('Napa Valley, California', style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 12)),
                               ],
                             ),
                           ],
                         ),
                       ),
-                      TextButton(onPressed: () {}, child: Text('View Farm', style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold))),
+                      TextButton(onPressed: () {}, child: Text('View Farm', style: GoogleFonts.poppins(color: DesignColors.primary, fontWeight: FontWeight.bold))),
                     ],
                   ),
                 ),
@@ -215,20 +218,20 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('FARMER\'S NOTE', style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text('FARMER\'S NOTE', style: GoogleFonts.poppins(color: DesignColors.primary, fontWeight: FontWeight.bold, fontSize: 12)),
                       const SizedBox(height: 8),
                       Text(
                         '\"These Heirlooms are peaking this week. We picked them early this morning while the dew was still on the leaves...\"',
-                        style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontStyle: FontStyle.italic),
+                        style: GoogleFonts.poppins(color: DesignColors.textPrimary, fontStyle: FontStyle.italic),
                       ),
                       const SizedBox(height: 8),
-                      Text('— Silas Green, Head Grower', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text('— Silas Green, Head Grower', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 12)),
                     ],
                   ),
                 ),
                 const SizedBox(height: DesignSpacing.xl),
 
-                Text('Nutritional Facts', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+                Text('Nutritional Facts', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: DesignSpacing.m),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -241,7 +244,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                 ),
                 const SizedBox(height: DesignSpacing.xl),
 
-                Text('GROWN AT', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+                Text('GROWN AT', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: DesignSpacing.m),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(DesignRadius.xl),
@@ -278,8 +281,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('TOTAL PRICE', style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold)),
-                Text('\$${(widget.product['price'] * _quantity).toStringAsFixed(2)}', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text('TOTAL PRICE', style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold)),
+                Text('\$${(widget.product['price'] * _quantity).toStringAsFixed(2)}', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(width: DesignSpacing.m),
@@ -314,7 +317,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                       children: [
                         const Icon(Icons.shopping_cart_outlined, color: DesignColors.primary),
                         const SizedBox(width: 8),
-                        Text('Add to Cart', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: DesignColors.primary)),
+                        Text('Add to Cart', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: DesignColors.primary)),
                       ],
                     ),
                   ),
@@ -344,7 +347,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
                     children: [
                       const Icon(Icons.bolt_rounded, color: Colors.white),
                       const SizedBox(width: 8),
-                      Text('Buy Now', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('Buy Now', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
                 ),
@@ -381,8 +384,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
       ),
       child: Column(
         children: [
-          Text(weight, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-          Text(price, style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12)),
+          Text(weight, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(price, style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 12)),
         ],
       ),
     );
@@ -398,10 +401,47 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
       ),
       child: Column(
         children: [
-          Text(label, style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold)),
+          Text(label, style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(value, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
         ],
+      ),
+    );
+  }
+
+  void _showImageZoom(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          children: [
+            Container(
+              color: Colors.black.withValues(alpha: 0.9),
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Center(
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => const CircularProgressIndicator(color: Colors.white),
+                    errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              right: 10,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

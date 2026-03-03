@@ -49,6 +49,62 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     await _client.auth.signOut();
     state = const AsyncValue.data(null);
   }
+
+  Future<bool> signInWithGoogle() async {
+    state = const AsyncValue.loading();
+    try {
+      final response = await _client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'io.supabase.farmconnect://login-callback',
+      );
+      return response;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  Future<bool> signInWithApple() async {
+    state = const AsyncValue.loading();
+    try {
+      final response = await _client.auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: 'io.supabase.farmconnect://login-callback',
+      );
+      return response;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  Future<bool> signInWithFacebook() async {
+    state = const AsyncValue.loading();
+    try {
+      final response = await _client.auth.signInWithOAuth(
+        OAuthProvider.facebook,
+        redirectTo: 'io.supabase.farmconnect://login-callback',
+      );
+      return response;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  Future<bool> signInWithGithub() async {
+    state = const AsyncValue.loading();
+    try {
+      final response = await _client.auth.signInWithOAuth(
+        OAuthProvider.github,
+        redirectTo: 'io.supabase.farmconnect://login-callback',
+      );
+      return response;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
 }
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {

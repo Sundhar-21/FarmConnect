@@ -111,7 +111,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                                 children: [
                                   Text(
                                     'DELIVER TO',
-                                    style: GoogleFonts.outfit(color: DesignColors.textTertiary, fontSize: 10, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.poppins(color: DesignColors.textTertiary, fontSize: 10, fontWeight: FontWeight.bold),
                                   ),
                                   Row(
                                     children: [
@@ -119,7 +119,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                                         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.35),
                                         child: Text(
                                           profile?['address']?.isEmpty ?? true ? 'Select Address' : profile!['address'],
-                                          style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.poppins(color: DesignColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
@@ -179,7 +179,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                   children: [
                     Text(
                       context.tr('freshFromTheFarm'),
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.poppins(
                         color: DesignColors.textPrimary,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -188,7 +188,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                     const SizedBox(height: 4),
                     Text(
                       context.tr('discoverOrganicProduce'),
-                      style: GoogleFonts.outfit(
+                      style: GoogleFonts.poppins(
                         color: DesignColors.textSecondary,
                         fontSize: 14,
                       ),
@@ -217,7 +217,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                           onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
                           decoration: InputDecoration(
                             hintText: 'Search fresh produce...',
-                            hintStyle: GoogleFonts.outfit(color: DesignColors.textTertiary, fontSize: 14),
+                            hintStyle: GoogleFonts.poppins(color: DesignColors.textTertiary, fontSize: 14),
                             border: InputBorder.none,
                             icon: Container(
                               padding: const EdgeInsets.all(8),
@@ -345,7 +345,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                               _searchQuery.isNotEmpty 
                                 ? 'No results found for "$_searchQuery"' 
                                 : 'No products available',
-                              style: GoogleFonts.outfit(
+                              style: GoogleFonts.poppins(
                                 color: DesignColors.textSecondary, 
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -357,7 +357,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                               _searchQuery.isNotEmpty
                                 ? 'Try a different search term'
                                 : 'Check back later for fresh produce',
-                              style: GoogleFonts.outfit(
+                              style: GoogleFonts.poppins(
                                 color: DesignColors.textTertiary, 
                                 fontSize: 14,
                               ),
@@ -370,7 +370,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                                   setState(() => _searchQuery = '');
                                 },
                                 icon: const Icon(Icons.clear, size: 18),
-                                label: Text('Clear search', style: GoogleFonts.outfit()),
+                                label: Text('Clear search', style: GoogleFonts.poppins()),
                               ),
                             ],
                           ],
@@ -427,24 +427,24 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                                       ),
                                       child: Text(
                                         'Featured',
-                                        style: GoogleFonts.outfit(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
+                                        style: GoogleFonts.poppins(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                     const Spacer(),
                                     Text(
                                       featuredProduct['name'] ?? 'Fresh Harvest Box',
-                                      style: GoogleFonts.outfit(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                                      style: GoogleFonts.poppins(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       'Fresh harvest delivered to your door',
-                                      style: GoogleFonts.outfit(color: DesignColors.primaryLight, fontSize: 14),
+                                      style: GoogleFonts.poppins(color: DesignColors.primaryLight, fontSize: 14),
                                     ),
                                     const SizedBox(height: 12),
                                     Row(
                                       children: [
                                         Text(
                                           '\$${featuredProduct['price']}',
-                                          style: GoogleFonts.outfit(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                                          style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                                         ),
                                         const Spacer(),
                                         Container(
@@ -457,7 +457,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                                             children: [
                                               Text(
                                                 'Order Now',
-                                                style: GoogleFonts.outfit(color: DesignColors.primaryDark, fontWeight: FontWeight.bold),
+                                                style: GoogleFonts.poppins(color: DesignColors.primaryDark, fontWeight: FontWeight.bold),
                                               ),
                                               const SizedBox(width: 4),
                                               const Icon(Icons.arrow_forward_rounded, color: DesignColors.primaryDark, size: 18),
@@ -484,7 +484,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                         children: [
                           Text(
                             'Recommended for you',
-                            style: GoogleFonts.outfit(color: const Color(0xFF111111), fontSize: 20, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.poppins(color: const Color(0xFF111111), fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                           TextButton(
                             onPressed: () => Navigator.push(
@@ -504,7 +504,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                             ),
                             child: Text(
                               'See All',
-                              style: GoogleFonts.outfit(color: DesignColors.primaryDark, fontWeight: FontWeight.w600),
+                              style: GoogleFonts.poppins(color: DesignColors.primaryDark, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ],
@@ -581,7 +581,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'Something went wrong',
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.poppins(
                               color: DesignColors.textPrimary,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -590,7 +590,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Unable to load products',
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.poppins(
                               color: DesignColors.textSecondary,
                               fontSize: 14,
                             ),
@@ -599,7 +599,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                           ElevatedButton.icon(
                             onPressed: () => ref.invalidate(productsProvider),
                             icon: const Icon(Icons.refresh_rounded),
-                            label: Text('Try Again', style: GoogleFonts.outfit()),
+                            label: Text('Try Again', style: GoogleFonts.poppins()),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: DesignColors.primary,
                               foregroundColor: Colors.white,
@@ -652,7 +652,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
               const SizedBox(height: 24),
               Text(
                 'Update Delivery Address',
-                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               Container(
@@ -686,7 +686,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                       ),
                       child: Text(
                         'Cancel',
-                        style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -722,7 +722,7 @@ class _ConsumerHomeScreenState extends ConsumerState<ConsumerHomeScreen> {
                             child: Center(
                               child: Text(
                                 'Update',
-                                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                                style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),

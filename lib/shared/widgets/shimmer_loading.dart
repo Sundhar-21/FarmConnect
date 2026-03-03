@@ -138,3 +138,67 @@ class SearchFieldShimmer extends StatelessWidget {
     );
   }
 }
+
+class ListItemShimmer extends StatelessWidget {
+  final int itemCount;
+  
+  const ListItemShimmer({super.key, this.itemCount = 5});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: DesignColors.shimmerBase,
+      highlightColor: DesignColors.shimmerHighlight,
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: itemCount,
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(DesignRadius.l),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OrderShimmer extends StatelessWidget {
+  const OrderShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: DesignColors.shimmerBase,
+      highlightColor: DesignColors.shimmerHighlight,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: DesignSpacing.m),
+        padding: const EdgeInsets.all(DesignSpacing.m),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(DesignRadius.l),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(width: 100, height: 16, color: Colors.white),
+                Container(width: 60, height: 14, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(width: 150, height: 12, color: Colors.white),
+            const SizedBox(height: 8),
+            Container(width: 80, height: 12, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+}

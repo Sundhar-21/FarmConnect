@@ -16,33 +16,33 @@ class AppTheme {
       error: DesignColors.error,
     ),
     scaffoldBackgroundColor: DesignColors.background,
-    textTheme: GoogleFonts.outfitTextTheme().copyWith(
-      bodyLarge: GoogleFonts.outfit(
+    textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+      bodyLarge: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
         color: const Color(0xFF111111),
       ),
-      bodyMedium: GoogleFonts.outfit(
+      bodyMedium: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: const Color(0xFF111111),
       ),
-      bodySmall: GoogleFonts.outfit(
+      bodySmall: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         color: const Color(0xFF666666),
       ),
-      titleLarge: GoogleFonts.outfit(
+      titleLarge: GoogleFonts.poppins(
         fontSize: 24,
         fontWeight: FontWeight.bold,
         color: const Color(0xFF111111),
       ),
-      titleMedium: GoogleFonts.outfit(
+      titleMedium: GoogleFonts.poppins(
         fontSize: 18,
         fontWeight: FontWeight.bold,
         color: const Color(0xFF111111),
       ),
-      titleSmall: GoogleFonts.outfit(
+      titleSmall: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: const Color(0xFF111111),
@@ -52,7 +52,7 @@ class AppTheme {
       backgroundColor: DesignColors.background,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: GoogleFonts.outfit(
+      titleTextStyle: GoogleFonts.poppins(
         color: DesignColors.textPrimary,
         fontSize: 20,
         fontWeight: FontWeight.bold,
@@ -68,7 +68,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(DesignRadius.xxl),
         ),
         elevation: 0,
-        textStyle: GoogleFonts.outfit(
+        textStyle: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
@@ -93,7 +93,7 @@ class AppTheme {
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: DesignColors.textPrimary,
-      contentTextStyle: GoogleFonts.outfit(color: Colors.white),
+      contentTextStyle: GoogleFonts.poppins(color: Colors.white),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignRadius.m),
       ),
@@ -113,12 +113,12 @@ class AppTheme {
       onSurface: Colors.white,
     ),
     scaffoldBackgroundColor: const Color(0xFF111111),
-    textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
+    textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: GoogleFonts.outfit(
+      titleTextStyle: GoogleFonts.poppins(
         color: Colors.white,
         fontSize: 20,
         fontWeight: FontWeight.bold,
@@ -133,7 +133,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DesignRadius.xxl),
         ),
-        textStyle: GoogleFonts.outfit(
+        textStyle: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),

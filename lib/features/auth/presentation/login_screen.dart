@@ -240,21 +240,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     _buildSocialButton(
                       icon: Icons.g_mobiledata_rounded,
-                      onTap: () {
+                      iconColor: const Color(0xFF4285F4),
+                      onTap: () async {
                         HapticFeedback.lightImpact();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Google sign-in coming soon!', style: GoogleFonts.outfit())),
-                        );
+                        try {
+                          await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Google sign-in failed: $e')),
+                            );
+                          }
+                        }
                       },
                     ),
                     const SizedBox(width: 16),
                     _buildSocialButton(
                       icon: Icons.apple_rounded,
-                      onTap: () {
+                      iconColor: Colors.black,
+                      onTap: () async {
                         HapticFeedback.lightImpact();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Apple sign-in coming soon!', style: GoogleFonts.outfit())),
-                        );
+                        try {
+                          await ref.read(authNotifierProvider.notifier).signInWithApple();
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Apple sign-in failed: $e')),
+                            );
+                          }
+                        }
                       },
                     ),
                   ],
@@ -358,6 +372,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildSocialButton({
     required IconData icon,
     required VoidCallback onTap,
+    Color? iconColor,
+    String? imageIcon,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -369,11 +385,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           borderRadius: BorderRadius.circular(DesignRadius.l),
           boxShadow: DesignShadows.small,
         ),
-        child: Icon(
-          icon,
-          color: DesignColors.textPrimary,
-          size: 30,
-        ),
+        child: imageIcon != null
+            ? Center(
+                child: Image.asset(
+                  imageIcon,
+                  width: 28,
+                  height: 28,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    icon,
+                    color: iconColor ?? DesignColors.textPrimary,
+                    size: 30,
+                  ),
+                ),
+              )
+            : Icon(
+                icon,
+                color: iconColor ?? DesignColors.textPrimary,
+                size: 30,
+              ),
       ),
     );
   }

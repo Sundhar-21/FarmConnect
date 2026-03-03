@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:farmconnect/features/consumer/data/cart_provider.dart';
 import 'package:farmconnect/shared/design_constants.dart';
+import 'package:farmconnect/shared/widgets/empty_state_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:farmconnect/core/services/supabase_service.dart';
 import 'package:farmconnect/features/consumer/presentation/order_success_screen.dart';
@@ -71,105 +73,107 @@ class CartScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.shopping_basket_outlined,
-            size: 80,
-            color: DesignColors.textSecondary.withOpacity(0.2),
-          ),
-          const SizedBox(height: DesignSpacing.m),
-          Text(
-            'Your basket is empty',
-            style: GoogleFonts.outfit(
-              color: DesignColors.textSecondary,
-              fontSize: 18,
-            ),
-          ),
-        ],
-      ),
+    return const EmptyStateWidget(
+      icon: Icons.shopping_basket_outlined,
+      title: 'Your basket is empty',
+      subtitle: 'Start shopping to add items to your basket',
     );
   }
 
   Widget _buildCartItem(BuildContext context, WidgetRef ref, CartItem item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: DesignSpacing.l),
-      child: Row(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: DesignColors.surface,
-              borderRadius: BorderRadius.circular(DesignRadius.m),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(DesignRadius.m),
-              child: CachedNetworkImage(
-                imageUrl: item.product['image_url'] ?? '',
-                fit: BoxFit.cover,
-                memCacheWidth: 200,
-                errorWidget: (context, url, error) => const Icon(Icons.eco, color: DesignColors.primary),
-                placeholder: (context, url) => Container(color: DesignColors.surface),
+    return Dismissible(
+      key: Key('cart_${item.product['id']}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: DesignSpacing.l),
+        decoration: BoxDecoration(
+          color: DesignColors.error,
+          borderRadius: BorderRadius.circular(DesignRadius.m),
+        ),
+        child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+      ),
+      onDismissed: (direction) {
+        HapticFeedback.mediumImpact();
+        ref.read(cartProvider.notifier).removeFromCart(item.product['id']);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: DesignSpacing.l),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: DesignColors.surface,
+                borderRadius: BorderRadius.circular(DesignRadius.m),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(DesignRadius.m),
+                child: CachedNetworkImage(
+                  imageUrl: item.product['image_url'] ?? '',
+                  fit: BoxFit.cover,
+                  memCacheWidth: 200,
+                  errorWidget: (context, url, error) => const Icon(Icons.eco, color: DesignColors.primary),
+                  placeholder: (context, url) => Container(color: DesignColors.surface),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: DesignSpacing.m),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: DesignSpacing.m),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.product['name'] ?? 'Product',
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.eco_rounded, size: 14, color: DesignColors.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Sunny Peaks Farm',
+                        style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${item.product['unit'] ?? '500g'} bag',
+                    style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  item.product['name'] ?? 'Product',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.eco_rounded, size: 14, color: DesignColors.primary),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Sunny Peaks Farm',
-                      style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
-                    ),
-                  ],
+                  '\$${(item.product['price'] * item.quantity).toStringAsFixed(2)}',
+                  style: GoogleFonts.poppins(color: DesignColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '${item.product['unit'] ?? '500g'} bag',
-                  style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: DesignColors.surface,
+                    borderRadius: BorderRadius.circular(DesignRadius.s),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildQtyBtn(context, ref, item.product['id'], item.quantity - 1, Icons.remove),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text('${item.quantity}', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                      ),
+                      _buildQtyBtn(context, ref, item.product['id'], item.quantity + 1, Icons.add, isPrimary: true),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '\$${(item.product['price'] * item.quantity).toStringAsFixed(2)}',
-                style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: DesignColors.surface,
-                  borderRadius: BorderRadius.circular(DesignRadius.s),
-                ),
-                child: Row(
-                  children: [
-                    _buildQtyBtn(context, ref, item.product['id'], item.quantity - 1, Icons.remove),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text('${item.quantity}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                    ),
-                    _buildQtyBtn(context, ref, item.product['id'], item.quantity + 1, Icons.add, isPrimary: true),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -232,6 +236,7 @@ class CartScreen extends ConsumerWidget {
 
   Widget _buildCheckoutPanel(BuildContext context, WidgetRef ref, double total, String shippingAddress) {
     const deliveryFee = 2.50;
+    final hasAddress = shippingAddress.isNotEmpty && shippingAddress != 'No Address Provided';
     
     return Container(
       padding: const EdgeInsets.all(DesignSpacing.l),
@@ -240,7 +245,7 @@ class CartScreen extends ConsumerWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(DesignRadius.xxl)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -256,23 +261,47 @@ class CartScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
-              Text('\$${(total + deliveryFee).toStringAsFixed(2)}', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text('Total', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text('\$${(total + deliveryFee).toStringAsFixed(2)}', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: DesignSpacing.m),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, color: DesignColors.primary, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Shipping to: $shippingAddress',
-                  style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 13),
-                  overflow: TextOverflow.ellipsis,
-                ),
+          GestureDetector(
+            onTap: () => _showAddressDialog(context, ref, shippingAddress),
+            child: Container(
+              padding: const EdgeInsets.all(DesignSpacing.m),
+              decoration: BoxDecoration(
+                color: hasAddress ? DesignColors.primary.withValues(alpha: 0.1) : DesignColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(DesignRadius.m),
+                border: hasAddress ? null : Border.all(color: DesignColors.error.withValues(alpha: 0.3)),
               ),
-            ],
+              child: Row(
+                children: [
+                  Icon(
+                    hasAddress ? Icons.location_on_outlined : Icons.add_location_alt_outlined,
+                    color: hasAddress ? DesignColors.primary : DesignColors.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      hasAddress ? 'Shipping to: $shippingAddress' : 'Tap to add delivery address',
+                      style: GoogleFonts.poppins(
+                        color: hasAddress ? DesignColors.textPrimary : DesignColors.error,
+                        fontSize: 13,
+                        fontWeight: hasAddress ? FontWeight.normal : FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(
+                    Icons.edit_outlined,
+                    color: hasAddress ? DesignColors.primary : DesignColors.error,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: DesignSpacing.m),
           
@@ -280,15 +309,30 @@ class CartScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.access_time_rounded, color: DesignColors.textSecondary, size: 20),
               const SizedBox(width: DesignSpacing.s),
-              Text('Next: Tomorrow, 8am-10am', style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontWeight: FontWeight.w500)),
+              Text('Next: Tomorrow, 8am-10am', style: GoogleFonts.poppins(color: DesignColors.textPrimary, fontWeight: FontWeight.w500)),
               const Spacer(),
-              TextButton(onPressed: () {}, child: Text('CHANGE', style: GoogleFonts.outfit(color: DesignColors.primary, fontWeight: FontWeight.bold))),
+              TextButton(onPressed: () {}, child: Text('CHANGE', style: GoogleFonts.poppins(color: DesignColors.primary, fontWeight: FontWeight.bold))),
             ],
           ),
           const SizedBox(height: DesignSpacing.m),
 
           ElevatedButton(
             onPressed: () async {
+              if (!hasAddress) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.location_off, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text('Please add your delivery address', style: GoogleFonts.poppins()),
+                      ],
+                    ),
+                    backgroundColor: DesignColors.error,
+                  ),
+                );
+                return;
+              }
               try {
                 final supabase = ref.read(supabaseProvider);
                 await ref.read(cartProvider.notifier).checkout(supabase, shippingAddress);
@@ -324,12 +368,139 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
+  void _showAddressDialog(BuildContext context, WidgetRef ref, String currentAddress) {
+    final controller = TextEditingController(text: currentAddress == 'No Address Provided' ? '' : currentAddress);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(DesignRadius.xxl)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: DesignColors.secondary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Delivery Address',
+                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Enter your delivery address for this order',
+                style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  color: DesignColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(DesignRadius.l),
+                ),
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your delivery address',
+                    border: InputBorder.none,
+                    prefixIcon: const Icon(Icons.location_on_outlined, color: DesignColors.primary),
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
+                  maxLines: 2,
+                  autofocus: true,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(DesignRadius.l),
+                        ),
+                        side: BorderSide(color: DesignColors.secondary),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: DesignGradients.primaryGradient,
+                        borderRadius: BorderRadius.circular(DesignRadius.l),
+                        boxShadow: DesignShadows.glow,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () async {
+                            final newAddress = controller.text.trim();
+                            if (newAddress.isNotEmpty) {
+                              final supabase = ref.read(supabaseProvider);
+                              final user = supabase.auth.currentUser;
+                              if (user != null) {
+                                await supabase
+                                    .from('profiles')
+                                    .update({'address': newAddress})
+                                    .eq('id', user.id);
+                                ref.invalidate(userProfileProvider);
+                              }
+                            }
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                          borderRadius: BorderRadius.circular(DesignRadius.l),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: Text(
+                                'Save Address',
+                                style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSummaryRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 16)),
-        Text(value, style: GoogleFonts.outfit(color: DesignColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(label, style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 16)),
+        Text(value, style: GoogleFonts.poppins(color: DesignColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }

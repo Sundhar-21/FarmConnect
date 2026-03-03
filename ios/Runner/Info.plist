@@ -49,5 +49,14 @@
 	<string>This app needs microphone access for voice commands</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app needs speech recognition access for voice commands</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.supabase.farmconnect</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

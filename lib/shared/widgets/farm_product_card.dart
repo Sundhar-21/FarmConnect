@@ -52,7 +52,7 @@ class FarmProductCard extends ConsumerWidget {
                 children: [
                   Text(
                     product['name'] ?? 'Product Name',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class FarmProductCard extends ConsumerWidget {
                   ),
                   Text(
                     product['description'] ?? 'Free Delivery',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.poppins(
                       color: Colors.white70,
                       fontSize: 14,
                     ),
@@ -70,7 +70,7 @@ class FarmProductCard extends ConsumerWidget {
                   const Spacer(),
                   Text(
                     'PRICE',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.poppins(
                       color: Colors.white70,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -78,7 +78,7 @@ class FarmProductCard extends ConsumerWidget {
                   ),
                   Text(
                     '\$${product['price']}',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -189,23 +189,26 @@ class FarmProductCard extends ConsumerWidget {
                 children: [
                   Container(
                     width: double.infinity,
+                    height: double.infinity,
                     decoration: BoxDecoration(
                       color: DesignColors.surfaceVariant,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(DesignRadius.xl)),
+                      borderRadius: BorderRadius.circular(DesignRadius.xl),
                     ),
-                    padding: const EdgeInsets.all(DesignSpacing.m),
-                    child: Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(DesignRadius.xl),
                       child: Hero(
                         tag: 'product_small_${product['id']}',
                         child: CachedNetworkImage(
                           imageUrl: product['image_url'] ?? '',
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
                           memCacheWidth: 300,
                           errorWidget: (context, url, error) => Container(
-                            padding: const EdgeInsets.all(16),
+                            width: double.infinity,
+                            height: double.infinity,
                             decoration: BoxDecoration(
                               color: DesignColors.primary.withOpacity(0.1),
-                              shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.eco, color: DesignColors.primary, size: 32),
                           ),
@@ -225,7 +228,7 @@ class FarmProductCard extends ConsumerWidget {
                       ),
                       child: Text(
                         'Fresh',
-                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.poppins(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -260,7 +263,7 @@ class FarmProductCard extends ConsumerWidget {
                 children: [
                   Text(
                     product['name'] ?? 'Product',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.poppins(
                       color: DesignColors.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -271,7 +274,7 @@ class FarmProductCard extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${product['unit'] ?? '500g'}',
-                    style: GoogleFonts.outfit(color: DesignColors.textSecondary, fontSize: 12),
+                    style: GoogleFonts.poppins(color: DesignColors.textSecondary, fontSize: 12),
                   ),
                   const SizedBox(height: DesignSpacing.s),
                   Row(
@@ -282,7 +285,7 @@ class FarmProductCard extends ConsumerWidget {
                         children: [
                           Text(
                             '\$${product['price']}',
-                            style: GoogleFonts.outfit(
+                            style: GoogleFonts.poppins(
                               color: DesignColors.primaryDark,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
