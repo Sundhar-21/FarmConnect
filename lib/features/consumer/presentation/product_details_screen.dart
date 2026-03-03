@@ -52,7 +52,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> wit
 
   @override
   Widget build(BuildContext context) {
-    final isFav = ref.watch(favoritesProvider.notifier).isFavorite(widget.product['id']);
+    final favorites = ref.watch(favoritesProvider);
+    final isFav = favorites.any((item) => item['id'] == widget.product['id']);
 
     return Scaffold(
       backgroundColor: Colors.white,

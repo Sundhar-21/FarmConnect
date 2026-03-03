@@ -28,7 +28,8 @@ class FarmProductCard extends ConsumerWidget {
   }
 
   Widget _buildLargeCard(BuildContext context, WidgetRef ref) {
-    final isFav = ref.watch(favoritesProvider.notifier).isFavorite(product['id']);
+    final favorites = ref.watch(favoritesProvider);
+    final isFav = favorites.any((item) => item['id'] == product['id']);
 
     return GestureDetector(
       onTap: onTap ?? () => Navigator.push(
@@ -167,7 +168,8 @@ class FarmProductCard extends ConsumerWidget {
   }
 
   Widget _buildSmallCard(BuildContext context, WidgetRef ref) {
-    final isFav = ref.watch(favoritesProvider.notifier).isFavorite(product['id']);
+    final favorites = ref.watch(favoritesProvider);
+    final isFav = favorites.any((item) => item['id'] == product['id']);
 
     return RepaintBoundary(
       child: GestureDetector(

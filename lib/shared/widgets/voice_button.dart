@@ -257,55 +257,87 @@ class _VoiceButtonState extends ConsumerState<VoiceButton>
       }
     });
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onLongPress: _showLanguageSelector,
-          child: AnimatedBuilder(
-            animation: _scaleAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: isListening ? _scaleAnimation.value : 1.0,
-                child: child,
-              );
-            },
-            child: GestureDetector(
-              onTap: _toggleListening,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: isListening
-                      ? const LinearGradient(
-                          colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : const LinearGradient(
-                          colors: [Color(0xFF28D339), Color(0xFF1BAF26)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isListening ? const Color(0xFFFF6B6B) : const Color(0xFF28D339))
-                          .withOpacity(0.5),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Icon(
-                  isListening ? Icons.mic : Icons.mic_none,
-                  color: Colors.white,
-                  size: 28,
-                ),
+    return GestureDetector(
+      onLongPress: _showLanguageSelector,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: isListening ? _scaleAnimation.value : 1.0,
+            child: child,
+          );
+        },
+        child: GestureDetector(
+          onTap: _toggleListening,
+          child: Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF28D339), Color(0xFF1BAF26)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF28D339).withValues(alpha: 0.4),
+                  blurRadius: 16,
+                  offset: const Offset(0, 5),
+                  spreadRadius: 1,
+                ),
+              ],
+              border: isListening
+                  ? Border.all(
+                      color: Colors.red,
+                      width: 3,
+                    )
+                  : Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isListening ? Icons.mic : Icons.mic_none,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
+                ),
+                if (isListening)
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withValues(alpha: 0.5),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

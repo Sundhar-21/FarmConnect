@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:farmconnect/shared/design_constants.dart';
 import 'package:farmconnect/features/consumer/data/cart_provider.dart';
+import 'package:farmconnect/features/consumer/data/favorites_provider.dart';
 import 'package:farmconnect/core/l10n/app_localizations.dart';
 
 class CustomBottomNav extends ConsumerWidget {
@@ -20,38 +21,39 @@ class CustomBottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartCount = ref.watch(cartProvider).length;
+    final favCount = ref.watch(favoritesProvider).length;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 6),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(32),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            height: 70,
+            height: 76,
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBackground.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(28),
+              color: CupertinoColors.systemBackground.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: CupertinoColors.systemGrey5.withOpacity(0.5),
+                color: CupertinoColors.systemGrey5.withValues(alpha: 0.5),
                 width: 0.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: CupertinoColors.black.withOpacity(0.08),
+                  color: CupertinoColors.black.withValues(alpha: 0.08),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, context.tr('home')),
                   _buildNavItem(1, CupertinoIcons.search, CupertinoIcons.search, context.tr('markets')),
-                  _buildNavItem(2, CupertinoIcons.heart_fill, CupertinoIcons.heart, context.tr('favorites')),
+                  _buildNavItem(2, CupertinoIcons.heart_fill, CupertinoIcons.heart, context.tr('favorites'), badge: favCount > 0 ? favCount : null),
                   _buildNavItem(3, CupertinoIcons.cart_fill, CupertinoIcons.cart, context.tr('cart'), badge: cartCount > 0 ? cartCount : null),
                   _buildNavItem(4, CupertinoIcons.person_fill, CupertinoIcons.person, context.tr('profile')),
                 ],
